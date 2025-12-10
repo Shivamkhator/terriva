@@ -3,12 +3,21 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
-    domains: [
-      "images.pexels.com",      // your compare images
-      "skybee.vercel.app",      // your profile/icon assets
-      "lh3.googleusercontent.com", // Google OAuth profile images
-    ],
-  },
+  remotePatterns: [
+    {
+      protocol: "https",
+      hostname: "skybee.vercel.app"
+    },
+    {
+      protocol: "https",
+      hostname: "lh3.googleusercontent.com"
+    },
+    {
+      protocol: "https",
+      hostname: "images.pexels.com",
+    }
+  ],
+}
 };
 
 export default nextConfig;

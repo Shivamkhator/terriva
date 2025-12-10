@@ -23,35 +23,36 @@ export default function Home() {
 
         {/* Title */}
         <h1 className="text-5xl font-bold text-foreground">
-          Terriva {session?.user?.name && `👋, ${session.user.name}`}
+          Terriva
         </h1>
 
-        <p className="text-xl text-gray-primary">
-          {status === "authenticated"
-            ? `Welcome back, ${session.user?.name ?? "friend"} 💕`
-            : "A Period Tracker Built for You"}
-        </p>
+        <div className="text-xl text-gray-primary">
+          {status === "authenticated" ? (
+            <div className="flex justify-center items-center gap-2">
+              <p>Welcome back, {session.user?.name ?? "friend"}</p>
+              <Avatar className="w-8 h-8">
+                <AvatarImage src={session.user?.image ?? ""} />
+                <AvatarFallback>{session.user?.name?.charAt(0)}</AvatarFallback>
+              </Avatar>
+            </div>
+          ) : (
+            "A Period Tracker Built for You"
+          )}
+        </div>
 
-        {/* Show Avatar If Logged In */}
-        {session && (
-          <Avatar className="mt-4">
-            <AvatarImage src={session.user?.image ?? ""} />
-            <AvatarFallback>{session.user?.name?.charAt(0)}</AvatarFallback>
-          </Avatar>
-        )}
 
         {/* Buttons */}
         <div className="flex gap-4 mt-2">
           {!session ? (
             <Link href="/auth/login">
               <button className="bg-action text-white px-6 py-3 rounded-xl text-lg font-semibold hover:opacity-90 transition">
-                Login
+                Log in
               </button>
             </Link>
           ) : (
-              <button onClick={handleLogout} className="bg-action text-white px-6 py-3 rounded-xl text-lg font-semibold hover:opacity-90 transition">
-                Logout
-              </button>
+            <button onClick={handleLogout} className="bg-action text-white px-6 py-3 rounded-xl text-lg font-semibold hover:opacity-90 transition">
+              Logout
+            </button>
           )}
 
           <button className="bg-accent text-action px-6 py-3 rounded-xl text-lg font-semibold hover:opacity-90 transition">

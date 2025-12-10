@@ -3,6 +3,7 @@
 import { FormEvent, MouseEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import { Icon } from "@iconify/react";
+import { useRouter } from "next/navigation";
 import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
 import Image from "next/image";
 
@@ -10,16 +11,21 @@ export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
 
+  const router = useRouter();
+  const callbackUrl = "/";
+
   const handleEmailLogin = async (e: FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setStatus("sending");
 
-    await signIn("email", {
-      email,
-      callbackUrl: "/",
-    });
+    sessionStorage.setItem("tmail", email);
 
+    const res = await signIn("email", { email, redirect: false, callbackUrl: "/" });
+
+    router.push(
+      "/auth/check-email"
+    );
     setStatus("sent");
   };
 
@@ -102,7 +108,7 @@ export default function SignInPage() {
 
             {/* Magic link form (NextAuth email) */}
             <form onSubmit={handleEmailLogin} className="space-y-3 mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-primary mb-1">
                 Email
               </label>
               <input
@@ -111,7 +117,7 @@ export default function SignInPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@email.com"
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 placeholder-gray-400 transition-all duration-200 focus:border-purple-400 focus:bg-white focus:outline-none"
+                className="w-full rounded-xl border border-gray-primary bg-white px-4 py-3 text-gray-primary placeholder-gray-400 transition-all duration-200 focus:border-purple-400 focus:bg-white focus:outline-none"
                 style={{
                   border: "1px solid #2aaa2a",
                   boxShadow: "2px 2px 1px rgb(0, 0, 0)",
@@ -121,10 +127,9 @@ export default function SignInPage() {
               <button
                 type="submit"
                 disabled={status === "sending"}
-                className="relative w-full rounded-xl py-3 font-medium text-white transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5 disabled:opacity-70"
+                className="relative w-full rounded-xl py-3 font-medium text-white transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5 disabled:opacity-70 bg-action hover:bg-teal-700"
                 style={{
                   border: "0.5px solid #2a2a2a",
-                  background: "#2F4F4F",
                   boxShadow: "2px 2px 1px rgb(0, 0, 0)",
                 }}
                 onMouseEnter={handlePrimaryHoverEnter}
@@ -132,24 +137,17 @@ export default function SignInPage() {
               >
                 {status === "sending" ? "Sending..." : "Continue with Email"}
               </button>
-
-              {status === "sent" && (
-                <p className="mt-2 text-center text-sm text-gray-600">
-                  Check your email for the login link.
-                </p>
-              )}
             </form>
 
             {/* Divider */}
-              <div className="mt-6 mb-4 flex items-center gap-2">
+            <div className="mt-6 mb-4 flex items-center gap-2 w-[90%] mx-auto">
               <span className="h-px flex-1 bg-gray-primary" />
               <span className="text-xs uppercase text-gray-primary">
-                Or continue with
+                Or
               </span>
               <span className="h-px flex-1 bg-gray-primary" />
             </div>
 
-            {/* Social logins (NextAuth) */}
             <div className="space-y-4">
               {/* Google */}
               <button
@@ -159,7 +157,7 @@ export default function SignInPage() {
                     callbackUrl: "/",
                   })
                 }
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-2.5 px-6 font-medium text-gray-700 transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-primary bg-white py-2.5 px-6 font-medium text-gray-primary transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5"
                 style={{
                   border: "0.5px solid #2aaa2a",
                   boxShadow: "4px 4px 2px rgb(0, 0, 0)",
@@ -172,8 +170,9 @@ export default function SignInPage() {
               </button>
             </div>
 
-            <p className="text-center text-sm text-gray-600 mt-4">
-              First time here? Just log in; we’ll take care of everything 🌿
+            <p className="text-center text-sm text-gray-primary mt-4">
+              First time here? Just log in;<br />
+              We’ll take care of everything 🌿
             </p>
           </div>
         </div>
