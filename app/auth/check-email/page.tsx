@@ -136,7 +136,7 @@ export default function CheckEmailPage() {
                                 onMouseEnter={handlePrimaryHoverEnter}
                                 onMouseLeave={handlePrimaryHoverLeave}
                             >
-                                {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend login link"}
+                                {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend Login Link"}
 
                             </button>
                         </div>
@@ -161,10 +161,6 @@ export default function CheckEmailPage() {
                                 The provided link will expire in 10 minutes.
                             </p>
                         </div>
-
-                        <p className="text-center text-sm text-gray-primary mt-4">
-                            © {new Date().getFullYear()} Terriva — Private, simple menstrual tracking
-                        </p>
                     </div>
                 </div>
             </div>
