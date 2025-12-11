@@ -145,8 +145,8 @@ export const authOptions: NextAuthOptions = {
   ],
 
   pages: {
-    signIn: "/auth/login",
-    verifyRequest: "/auth/check-email",
+    signIn: "/login",
+    verifyRequest: "/check-email",
   },
 
   session: {

@@ -24,7 +24,7 @@ export default function SignInPage() {
     const res = await signIn("email", { email, redirect: false, callbackUrl: "/" });
 
     router.push(
-      "/auth/check-email"
+      "/check-email"
     );
     setStatus("sent");
   };

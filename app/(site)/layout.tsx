@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import TerrivaNavigationMenu from "@/components/TerrivaNavigationMenu";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,9 +28,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SessionProviderWrapper>
+        <TerrivaNavigationMenu />
+        <div className="mt-16">
           {children}
-        </SessionProviderWrapper>
+        </div>
       </body>
     </html>
   );

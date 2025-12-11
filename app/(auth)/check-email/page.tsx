@@ -144,7 +144,7 @@ export default function CheckEmailPage() {
                         <div className="space-y-4">
                             <button
                                 type="button"
-                                onClick={() => window.location.assign("/auth/login")}
+                                onClick={() => window.location.assign("/login")}
                                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-primary bg-white py-2.5 px-6 font-medium text-gray-primary transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5"
                                 style={{
                                     border: "0.5px solid #2aaa2a",

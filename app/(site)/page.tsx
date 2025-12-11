@@ -26,25 +26,11 @@ export default function Home() {
           Terriva
         </h1>
 
-        <div className="text-xl text-gray-primary">
-          {status === "authenticated" ? (
-            <div className="flex justify-center items-center gap-2">
-              <p>Welcome back, {session.user?.name ?? "friend"}</p>
-              <Avatar className="w-8 h-8">
-                <AvatarImage src={session.user?.image ?? ""} />
-                <AvatarFallback>{session.user?.name?.charAt(0)}</AvatarFallback>
-              </Avatar>
-            </div>
-          ) : (
-            "A Period Tracker Built for You"
-          )}
-        </div>
-
 
         {/* Buttons */}
         <div className="flex gap-4 mt-2">
           {!session ? (
-            <Link href="/auth/login">
+            <Link href="/login">
               <button className="bg-action text-white px-6 py-3 rounded-xl text-lg font-semibold hover:opacity-90 transition">
                 Log in
               </button>
