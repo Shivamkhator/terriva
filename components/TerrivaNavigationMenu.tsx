@@ -65,7 +65,7 @@ export default function TerrivaNavbar() {
 
   return (
     <>
-      <div className="hidden md:block w-full fixed bg-[#2F4F4F] top-0 z-999 backdrop-blur-md border-b border-white/10 shadow-xl text-sm">
+      <div className="hidden md:block w-full fixed bg-[#2F4F4F] top-0 z-99 backdrop-blur-md border-b border-white/10 shadow-xl text-sm">
         <nav className="h-16 flex items-center mx-8 w-full justify-between">
 
           <div className="flex items-center">
@@ -119,7 +119,7 @@ export default function TerrivaNavbar() {
                 </button>
 
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-3 w-38 rounded-md bg-white border border-gray-200 shadow-lg py-1 z-9999">
+                  <div className="absolute right-0 mt-3 w-38 rounded-md bg-white border border-gray-200 shadow-lg py-1 z-99">
                     <Link href="/dashboard/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setUserMenuOpen(false)}>Settings</Link>
                     <button onClick={() => signOut({ callbackUrl: "/" })} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</button>
                   </div>
@@ -130,7 +130,7 @@ export default function TerrivaNavbar() {
         </nav>
       </div>
 
-      <nav className="md:hidden gap-4 fixed bottom-6 left-1/2 -translate-x-1/2 h-16 px-2 bg-primary backdrop-blur-xl rounded-full border border-black/30 shadow-xl z-999 flex justify-around items-center">
+      <nav className="md:hidden gap-4 fixed bottom-6 left-1/2 -translate-x-1/2 h-16 px-2 bg-primary backdrop-blur-xl rounded-full border border-black/30 shadow-xl z-99 flex justify-around items-center">
         {visibleItems.map((item) => {
           const active = isActive(item.path)
 
