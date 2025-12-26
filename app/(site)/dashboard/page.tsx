@@ -1,19 +1,12 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import DashboardClient from "./DashboardClient";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
-    redirect("/login");
-  }
+  if (!session) redirect("/login");
 
-  return (
-    <div style={{ padding: 16 }}>
-      <h1>Dashboard</h1>
-      <p>Welcome, {session.user?.email}</p>
-      <p>Here will go your period tracking data, charts, etc.</p>
-    </div>
-  );
+  return <DashboardClient user={session.user} />;
 }

@@ -8,10 +8,10 @@ import { ArrowRight, ArrowDown, Activity, Calendar, PieChart, Shield } from "luc
 import { useSession } from "next-auth/react";
 import { PreviewCard, PreviewCardPanel, PreviewCardTrigger } from "@/components/animate-ui/components/base/preview-card";
 
-// --- Updated Data with Direct Links ---
 const features = [
+
     {
-        id: "01",
+        id: 1,
         title: "Secure & Encrypted",
         subtitle: "Security First",
         description: "Well protected with end-to-end encryption to track & share securely.",
@@ -19,22 +19,18 @@ const features = [
         icon: Shield,
     },
     {
-        id: "02",
+        id: 2,
         title: "Daily Log",
         subtitle: "Dashboard",
         description: "Your central hub to log your flow & mood instantly.",
-        link: "/dashboard",
-        linkText: "Go to Dashboard",
         color: "bg-teal-500", // Teal
         icon: Calendar,
     },
     {
-        id: "03",
+        id: 3,
         title: "Cycle Analysis",
         subtitle: "Analysis",
         description: "Visualize your history & get predictions about your next phase.",
-        link: "/analysis",
-        linkText: "View Analysis",
         color: "bg-[#FF6F79]", // Coral
         icon: Activity,
     },
@@ -51,18 +47,6 @@ export default function PeriodTrackerHome() {
 
     return (
         <div ref={containerRef} className="relative bg-background text-foreground font-sans selection:bg-primary selection:text-white">
-
-            <div className="fixed inset-0 z-0 flex items-center justify-center pointer-events-none opacity-10 overflow-hidden">
-                <motion.div
-                    style={{ rotate }}
-                    className="relative w-[140vh] h-[140vh] border-1px border-primary/40 rounded-full flex items-center justify-center"
-                >
-                    <div className="w-[70%] h-[70%] border-1px border-primary/30 rounded-full flex items-center justify-center"></div>
-                    <div className="absolute w-full h-1 bg-primary/20"></div>
-                    <div className="absolute h-full w-1 bg-primary/20"></div>
-                </motion.div>
-            </div>
-
             <HeroSection />
             <ScrollCarouselSection />
             <FooterSection />
@@ -91,12 +75,12 @@ function HeroSection() {
 
     return (
         <section className="relative z-10 h-screen w-full flex flex-col justify-between pl-6 md:p-12 border-b border-primary/10">
-            <nav className="flex justify-between items-start uppercase tracking-widest text-sm font-bold text-gray-primary/80">
+            <nav className="flex justify-between items-start uppercase tracking-widest text-sm md:text-md font-bold text-gray-primary/80">
                 <div>Terriva by SkyBee</div>
 
             </nav>
 
-            <div className="mt-auto mb-20 md:mb-24 mr-8 md:me-2">
+            <div className="mt-auto mb-[10vh] md:mb-[4vh] mr-2 md:mr-6">
                 <h1 className="text-[20vw] md:text-[14vw] leading-[0.85] font-bold text-primary tracking-tighter uppercase mix-blend-darken">
                     Clarity <span className="block italic font-serif font-light text-accent-foreground ml-[9vw]">Every</span> Month
                 </h1>
@@ -111,11 +95,9 @@ function HeroSection() {
                 </div>
             </div>
 
-            {/* Motion-wrapped image */}
             <motion.div
-                // x and y are applied here; Framer Motion will animate/interpolate to new values
                 style={{ x, y }}
-                className=" absolute -z-1 top-4 md:top-12 -right-2 md:right-12 pointer-events-none"
+                className=" absolute -z-1 top-4 md:top-12 md:right-12 pointer-events-none"
             >
                 <Image
                     src="/terriva.png"
@@ -194,7 +176,6 @@ function FeatureCounter({ activeIndex }: { activeIndex: MotionValue<number> }) {
     )
 }
 
-// --- UPDATED SLIDE: Full Screen Split (No Cards) ---
 function CarouselSlide({ feature, index, totalSlides, scrollYProgress }: any) {
     const step = 1 / totalSlides
     const start = index * step
@@ -241,14 +222,6 @@ function CarouselSlide({ feature, index, totalSlides, scrollYProgress }: any) {
                     <p className="text-lg lg:text-xl text-gray-primary mb-12 max-w-md leading-relaxed">
                         {feature.description}
                     </p>
-                    {feature.link && (
-                        <Link href={feature.link} className="group flex items-center gap-4 text-sm font-bold uppercase tracking-widest text-primary hover:text-accent-foreground transition-colors">
-                            <span className="border-b border-primary/30 pb-1 group-hover:border-accent-foreground/50 transition-colors">
-                                {feature.linkText}
-                            </span>
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
-                        </Link>
-                    )}
                 </div>
 
             </div>
@@ -282,14 +255,14 @@ function FooterSection() {
                         <div className="flex flex-col gap-2">
                             <div>
                                 <div className="font-bold">Terriva</div>
-                                <div className="text-xs text-muted-foreground">A product by SkyBee</div>
+                                <div className="text-xs text-muted-foreground">SkyBee's Creation</div>
                             </div>
                             <div className="text-sm text-gray-700">
-                                Building useful tools for everyone!
+                                Building useful tools for a better digital life.
                             </div>
                             <div className="flex">
                                 <Link href="mailto:skybee.hq@gmail.com" className="px-4 py-2 bg-primary text-white rounded-full text-sm hover:scale-105 transition-transform">
-                                Mail Us
+                                    Mail Us
                                 </Link>
                             </div>
                         </div>
@@ -297,8 +270,8 @@ function FooterSection() {
                 </PreviewCardPanel>
             </PreviewCard>
             <div className="flex gap-4">
-                <Link href="/dashboard" className="px-8 py-4 border border-white/20 text-white font-bold rounded-full hover:bg-white/10 transition-colors hover:scale-105">
-                    {session ? "Open Dashboard" : "Login"}
+                <Link href="/dashboard" className="px-6 py-4 border border-white/20 text-white font-bold rounded-full hover:bg-white/10 transition-colors hover:scale-105">
+                    {session ? "Dashboard" : "Login"}
                 </Link>
                 <Link href="https://instagram.com/weareskybee" className="heart-btn">
                     <span aria-hidden="true"></span>
