@@ -49,8 +49,8 @@ interface Period {
 }
 
 const FLOW_STATES = [
-    { value: 0, label: "None", color: "#FFFFFF", textColor: "#2A2A2A" },
-    { value: 1, label: "Light", color: "#FCE7F3", textColor: "#2A2A2A" },
+    { value: 0, label: "None", color: "#", textColor: "#2A2A2A" },
+    { value: 1, label: "Light", color: "#E9D5E1", textColor: "#2A2A2A" },
     { value: 2, label: "Medium", color: "#FBBBCE", textColor: "#2A2A2A" },
     { value: 3, label: "Heavy", color: "#FCA5AC", textColor: "#2A2A2A" },
 ];
@@ -79,41 +79,36 @@ export default function DashboardClient() {
         return t;
     }, []);
 
-    // Load data from storage
     useEffect(() => {
         const loadData = async () => {
             try {
-                const periodsData = localStorage.getItem('periods');
-                const flowsData = localStorage.getItem('dailyFlows');
-
-                if (periodsData) {
-                    const loadedPeriods = JSON.parse(periodsData);
-                    setPeriods(loadedPeriods.map((p: any) => ({
+                // Fetch periods
+                const periodsRes = await fetch('/api/periods');
+                if (periodsRes.ok) {
+                    const periodsData = await periodsRes.json();
+                    setPeriods(periodsData.map((p: any) => ({
                         ...p,
                         startDate: new Date(p.startDate),
                         endDate: p.endDate ? new Date(p.endDate) : undefined,
                     })));
                 }
 
-                if (flowsData) {
-                    setDailyFlows(JSON.parse(flowsData));
+                // Fetch flows
+                const flowsRes = await fetch('/api/flows');
+                if (flowsRes.ok) {
+                    const flowsData = await flowsRes.json();
+                    setDailyFlows(flowsData.map((f: any) => ({
+                        date: new Date(f.date).toISOString().split('T')[0],
+                        intensity: f.intensity,
+                    })));
                 }
             } catch (error) {
-                console.log('No saved data found');
+                console.error('Error loading data:', error);
             }
         };
         loadData();
     }, []);
 
-    // Save data to storage
-    const saveData = async (newPeriods: Period[], newFlows: DailyFlow[]) => {
-        try {
-            localStorage.setItem('periods', JSON.stringify(newPeriods));
-            localStorage.setItem('dailyFlows', JSON.stringify(newFlows));
-        } catch (error) {
-            console.error('Failed to save data:', error);
-        }
-    };
 
     // Calculate insights
     const insights = React.useMemo(() => {
@@ -202,46 +197,71 @@ export default function DashboardClient() {
     }, [dateRange]);
 
     // Handle flow logging
-    const handleLogFlow = () => {
+    const handleLogFlow = async () => {
         const dateStr = today.toISOString().split('T')[0];
-        const existingIndex = dailyFlows.findIndex(f => f.date === dateStr);
 
-        let newFlows;
-        if (existingIndex >= 0) {
-            newFlows = [...dailyFlows];
-            newFlows[existingIndex] = { date: dateStr, intensity: flow };
-        } else {
-            newFlows = [...dailyFlows, { date: dateStr, intensity: flow }];
+        try {
+            const response = await fetch('/api/flows', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: dateStr, intensity: flow }),
+            });
+
+            if (response.ok) {
+                const existingIndex = dailyFlows.findIndex(f => f.date === dateStr);
+                let newFlows;
+                if (existingIndex >= 0) {
+                    newFlows = [...dailyFlows];
+                    newFlows[existingIndex] = { date: dateStr, intensity: flow };
+                } else {
+                    newFlows = [...dailyFlows, { date: dateStr, intensity: flow }];
+                }
+                setDailyFlows(newFlows);
+                setFlow(1);
+            } else {
+                console.error('Failed to save flow');
+            }
+        } catch (error) {
+            console.error('Error saving flow:', error);
         }
-
-        setDailyFlows(newFlows);
-        saveData(periods, newFlows);
-
-        setFlow(1);
     };
 
     // Handle period tracking
-    const handleSavePeriod = () => {
+    const handleSavePeriod = async () => {
         if (!dateRange.from) return;
 
-        const periodFlows = dailyFlows.filter(f => {
-            const flowDate = new Date(f.date);
-            const isAfterStart = flowDate >= dateRange.from!;
-            const isBeforeEnd = dateRange.to ? flowDate <= dateRange.to : true;
-            return isAfterStart && isBeforeEnd;
-        });
+        try {
+            const response = await fetch('/api/periods', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    startDate: dateRange.from.toISOString(),
+                    endDate: dateRange.to ? dateRange.to.toISOString() : null,
+                }),
+            });
 
-        const newPeriod: Period = {
-            id: Date.now().toString(),
-            startDate: dateRange.from,
-            endDate: dateRange.to,
-            dailyFlows: periodFlows,
-        };
+            if (response.ok) {
+                const newPeriod = await response.json();
+                const periodFlows = dailyFlows.filter(f => {
+                    const flowDate = new Date(f.date);
+                    const isAfterStart = flowDate >= dateRange.from!;
+                    const isBeforeEnd = dateRange.to ? flowDate <= dateRange.to : true;
+                    return isAfterStart && isBeforeEnd;
+                });
 
-        const newPeriods = [...periods, newPeriod];
-        setPeriods(newPeriods);
-        saveData(newPeriods, dailyFlows);
-        resetPeriodForm();
+                setPeriods([...periods, {
+                    id: newPeriod.id,
+                    startDate: new Date(newPeriod.startDate),
+                    endDate: newPeriod.endDate ? new Date(newPeriod.endDate) : undefined,
+                    dailyFlows: periodFlows,
+                }]);
+                resetPeriodForm();
+            } else {
+                console.error('Failed to save period');
+            }
+        } catch (error) {
+            console.error('Error saving period:', error);
+        }
     };
 
     const resetPeriodForm = () => {
@@ -249,18 +269,29 @@ export default function DashboardClient() {
         setHasEnded(false);
     };
 
-    const deletePeriod = (id: string) => {
-        const newPeriods = periods.filter(p => p.id !== id);
-        setPeriods(newPeriods);
-        saveData(newPeriods, dailyFlows);
+    const deletePeriod = async (id: string) => {
+        try {
+            const response = await fetch(`/api/periods/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                const newPeriods = periods.filter(p => p.id !== id);
+                setPeriods(newPeriods);
+            } else {
+                console.error('Failed to delete period');
+            }
+        } catch (error) {
+            console.error('Error deleting period:', error);
+        }
     };
 
     return (
         <div className="min-h-screen">
             <div className="flex w-full max-w-5xl mx-auto flex-col gap-6 p-4 md:p-8">
                 {/* Header */}
-                <div className="text-center space-y-2 pt-8 pb-4">
-                    <h1 className="text-4xl md:text-5xl font-bold bg-linear-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                <div className="text-center space-y-2 pb-2">
+                    <h1 className="text-5xl font-bold bg-linear-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
                         Dashboard
                     </h1>
                     <p className="text-muted-foreground text-xs md:text-base">
@@ -272,7 +303,7 @@ export default function DashboardClient() {
                 {insights && (
                     <Card className="bg-white/80 backdrop-blur-sm border-pink-100 shadow-xl">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-pink-900">
+                            <CardTitle className="flex items-center justify-center gap-2 text-pink-900">
                                 <Sparkles className="h-5 w-5 text-pink-500" />
                                 Your Cycle Insights
                             </CardTitle>
@@ -296,7 +327,7 @@ export default function DashboardClient() {
                                 </div>
                                 <div className="bg-linear-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200 shadow-sm">
                                     <p className="text-xs text-indigo-700 mb-1 font-medium">Next Period Prediction</p>
-                                    <p className="text-sm font-bold text-indigo-600 mt-2">
+                                    <p className="text-lg font-bold text-indigo-600 mt-2">
                                         {insights.nextPredicted ? formatDate(insights.nextPredicted) : 'N/A'}
                                     </p>
                                 </div>
@@ -522,7 +553,7 @@ export default function DashboardClient() {
                 {/* History Calendar */}
                 <Card className="shadow-xl bg-white/80 backdrop-blur-sm border-pink-100">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center justify-center gap-2">
                             <Activity className="h-5 w-5 text-pink-500" />
                             Cycle Dashboard
                         </CardTitle>
@@ -556,22 +587,34 @@ export default function DashboardClient() {
                                         }),
                                         predicted: insights?.nextPredicted ? [insights.nextPredicted] : [],
                                     }}
-                                    modifiersClassNames={{
-                                        period: "ring-2 ring-pink-400 ring-inset font-semibold",
-                                        predicted: "ring-2 ring-purple-400 ring-inset ring-dashed",
-                                    }}
                                     components={{
                                         Day: (props: any) => {
                                             const { day } = props;
-                                            if (!day?.date) return <div />;
+                                            if (!day) return <div />;
 
                                             const date = day.date;
                                             const dateStr = date.toISOString().split("T")[0];
                                             const flow = dailyFlows.find(f => f.date === dateStr);
                                             const flowState = flow ? FLOW_STATES[flow.intensity] : null;
 
-                                            const isPredicted = insights?.nextPredicted &&
-                                                date.toDateString() === insights.nextPredicted.toDateString();
+                                            let isPeriodDay = false;
+                                            let periodDayNumber = 0;
+
+                                            for (const period of periods) {
+                                                const start = new Date(period.startDate);
+                                                start.setHours(0, 0, 0, 0);
+                                                const end = period.endDate ? new Date(period.endDate) : start;
+                                                end.setHours(0, 0, 0, 0);
+                                                const checkDate = new Date(date);
+                                                checkDate.setHours(0, 0, 0, 0);
+
+                                                if (checkDate >= start && checkDate <= end) {
+                                                    isPeriodDay = true;
+                                                    periodDayNumber = Math.floor((checkDate.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                                                    break;
+                                                }
+                                            }
+
 
                                             return (
                                                 <div className="relative w-full h-full flex items-center justify-center group">
@@ -580,7 +623,7 @@ export default function DashboardClient() {
                                                         style={{
                                                             backgroundColor: flowState ? `${flowState.color}` : undefined,
                                                             color: flowState ? flowState.textColor : undefined,
-                                                            border: flowState ? '2px solid rgba(0,0,0,0.4)' : undefined,
+                                                            border: (flowState || isPeriodDay) ? '2px solid rgba(0,0,0,0.3)' : undefined,
 
                                                         }}
                                                     >
@@ -588,9 +631,9 @@ export default function DashboardClient() {
                                                     </div>
 
                                                     {/* Tooltip */}
-                                                    {(flowState || isPredicted) && (
+                                                    {(flowState || isPeriodDay) && (
                                                         <div className="absolute bottom-full mb-2 hidden group-hover:flex bg-gray-900 text-white text-xs rounded-lg px-3 py-1.5 whitespace-nowrap z-10 shadow-lg">
-                                                            {flowState ? `${flowState.label} Flow` : 'Predicted Period'}
+                                                            {(flowState && isPeriodDay) ? `Day ${periodDayNumber} with ${flowState.label} Flow` : isPeriodDay ? `Day ${periodDayNumber}` : flowState ? `${flowState.label} Flow` : ''}
                                                         </div>
                                                     )}
                                                 </div>
@@ -598,43 +641,6 @@ export default function DashboardClient() {
                                         },
                                     }}
                                 />
-
-                                {/* Legend */}
-                                <div className="bg-linear-to-r from-pink-50 to-purple-50 rounded-xl p-6 border-2 border-pink-100">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <p className="text-xs text-gray-600 mb-2 font-medium">Flow Intensity</p>
-                                            <div className="grid grid-cols-4 gap-2">
-                                                {FLOW_STATES.map((state) => (
-                                                    <div key={state.value} className="flex items-center gap-2">
-                                                        <div
-                                                            className="w-6 h-6 rounded-md border-2 border-gray-200 shadow-sm"
-                                                            style={{ backgroundColor: state.color }}
-                                                        />
-                                                        <span className="text-xs font-medium" style={{ color: state.textColor }}>
-                                                            {state.label}
-                                                        </span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-600 mb-2 font-medium">Calendar Markers</p>
-                                            <div className="flex flex-wrap gap-4">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 rounded-md border-2 border-pink-400 bg-white" />
-                                                    <span className="text-xs text-gray-700">Period Days</span>
-                                                </div>
-                                                {insights?.nextPredicted && (
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-6 h-6 rounded-md border-2 border-dashed border-purple-400 bg-white" />
-                                                        <span className="text-xs text-gray-700">Predicted Start</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         )}
                     </CardContent>
@@ -644,7 +650,7 @@ export default function DashboardClient() {
                 {periods.length > 0 && (
                     <Card className="shadow-xl bg-white/80 backdrop-blur-sm border-pink-100 mb-24">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
+                            <CardTitle className="flex items-center justify-center gap-2">
                                 <TrendingUp className="h-5 w-5 text-pink-500" />
                                 Period History
                             </CardTitle>

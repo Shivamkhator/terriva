@@ -28,9 +28,9 @@ const features = [
     },
     {
         id: 3,
-        title: "Cycle Analysis",
-        subtitle: "Analysis",
-        description: "Visualize your history & get predictions about your next phase.",
+        title: "Cycle Insights",
+        subtitle: "Insights",
+        description: "Know your body better with predictions & personalized insights.",
         color: "bg-[#FF6F79]", // Coral
         icon: Activity,
     },

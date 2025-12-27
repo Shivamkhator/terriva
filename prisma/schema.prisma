@@ -15,6 +15,9 @@ model User {
 
   accounts      Account[]
   sessions      Session[]
+
+  periods       Period[]
+  dailyFlows    DailyFlow[]
 }
 
 model Account {
@@ -51,4 +54,31 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+
+
+model Period {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startDate   DateTime
+  endDate     DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([userId])
+}
+
+model DailyFlow {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime
+  intensity   Int      // 0 = None, 1 = Light, 2 = Medium, 3 = Heavy
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId])
 }

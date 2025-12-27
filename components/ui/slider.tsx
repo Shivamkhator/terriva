@@ -47,7 +47,7 @@ const Slider = React.forwardRef<
                 props.value?.[0] === 0
                   ? "##FFFFFF"
                   : props.value?.[0] === 1
-                  ? "#FCE7F3"
+                  ? "#E9D5E1"
                   : props.value?.[0] === 2
                   ? "#FBBBCE"
                   : "#FCA5AC",

@@ -7,33 +7,33 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 
 export const authOptions: NextAuthOptions = {
-    adapter: PrismaAdapter(prisma) as any,
-    providers: [
+  adapter: PrismaAdapter(prisma) as any,
+  providers: [
 
-        // 1) Email magic link
-        EmailProvider({
-            maxAge: 10 * 60, // 10 minutes
-            server: {
-                host: process.env.EMAIL_SERVER_HOST,
-                port: Number(process.env.EMAIL_SERVER_PORT),
+    // 1) Email magic link
+    EmailProvider({
+      maxAge: 10 * 60, // 10 minutes
+      server: {
+        host: process.env.EMAIL_SERVER_HOST,
+        port: Number(process.env.EMAIL_SERVER_PORT),
 
-                auth: {
-                    user: process.env.EMAIL_SERVER_USER,
-                    pass: process.env.EMAIL_SERVER_PASS,
-                },
-            },
-            from: process.env.EMAIL_FROM,
+        auth: {
+          user: process.env.EMAIL_SERVER_USER,
+          pass: process.env.EMAIL_SERVER_PASS,
+        },
+      },
+      from: process.env.EMAIL_FROM,
 
-            async sendVerificationRequest({ identifier, url, provider }) {
-                const { host } = new URL(url);
-                const transportOptions =
-                    typeof provider.server === "string" ? provider.server : provider.server;
-                const transporter = nodemailer.createTransport(transportOptions);
+      async sendVerificationRequest({ identifier, url, provider }) {
+        const { host } = new URL(url);
+        const transportOptions =
+          typeof provider.server === "string" ? provider.server : provider.server;
+        const transporter = nodemailer.createTransport(transportOptions);
 
-                const appName = "Terriva";
-                const from = provider.from || `Terriva <${process.env.EMAIL_FROM}>`;
+        const appName = "Terriva";
+        const from = provider.from || `Terriva <${process.env.EMAIL_FROM}>`;
 
-                const emailHtml = `
+        const emailHtml = `
          <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -112,51 +112,52 @@ export const authOptions: NextAuthOptions = {
   </html>
   `;
 
-                const emailText = `Sign in to ${appName}: ${url}\n\nIf you didn't request this, please ignore this email.`;
+        const emailText = `Sign in to ${appName}: ${url}\n\nIf you didn't request this, please ignore this email.`;
 
-                // Send the mail
-                await transporter.sendMail({
-                    to: identifier,
-                    from,
-                    subject: `${appName}'s Login Link`,
-                    text: emailText,
-                    html: emailHtml,
-                });
-                try {
-                    await prisma.verificationToken.deleteMany({
-                        where: {
-                            expires: { lt: new Date() },
-                        },
-                    });
-                } catch (err) {
-                    console.error("Failed to delete expired verification tokens:", err);
-                }
+        // Send the mail
+        await transporter.sendMail({
+          to: identifier,
+          from,
+          subject: `${appName}'s Login Link`,
+          text: emailText,
+          html: emailHtml,
+        });
+        try {
+          await prisma.verificationToken.deleteMany({
+            where: {
+              expires: { lt: new Date() },
             },
-        }),
+          });
+        } catch (err) {
+          console.error("Failed to delete expired verification tokens:", err);
+        }
+      },
+    }),
 
 
-        // 2) Google OAuth
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        }),
-    ],
+    // 2) Google OAuth
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+  ],
 
-    pages: {
-        signIn: "/login",
-        verifyRequest: "/check-email",
+  pages: {
+    signIn: "/login",
+    verifyRequest: "/check-email",
+  },
+
+  session: {
+    strategy: "jwt",
+  },
+
+ callbacks: {
+    async session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub // ✅ ALWAYS EXISTS
+      }
+      return session
     },
+  },
 
-    session: {
-        strategy: "jwt",
-    },
-
-    callbacks: {
-        async session({ session, token }) {
-            if (token?.sub) {
-                (session as any).userId = token.sub;
-            }
-            return session;
-        },
-    },
 };
