@@ -9,7 +9,6 @@ import { prisma } from "@/lib/prisma";
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma as any),
   secret: process.env.NEXTAUTH_SECRET,
-  trustHost: true,
   debug: process.env.NODE_ENV === "development", 
   useSecureCookies: process.env.NODE_ENV === "production",
   providers: [
