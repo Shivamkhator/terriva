@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma";
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma as any),
   secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true,
   debug: process.env.NODE_ENV === "development", 
   useSecureCookies: process.env.NODE_ENV === "production",
   providers: [
@@ -32,9 +33,7 @@ export const authOptions: NextAuthOptions = {
 
       async sendVerificationRequest({ identifier, url, provider }) {
         const { host } = new URL(url);
-        const transportOptions =
-          typeof provider.server === "string" ? provider.server : provider.server;
-        const transporter = nodemailer.createTransport(transportOptions);
+        const transporter = nodemailer.createTransport(provider.server);
 
         const appName = "Terriva";
         const from = provider.from || `Terriva <${process.env.EMAIL_FROM}>`;
