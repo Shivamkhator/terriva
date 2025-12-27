@@ -100,7 +100,7 @@ function HeroSection() {
                 className=" absolute -z-1 top-4 md:top-12 md:right-12 pointer-events-none"
             >
                 <Image
-                    src="/terriva.png"
+                    src="/Terriva.png"
                     alt="Terriva Logo"
                     width={512}
                     height={512}

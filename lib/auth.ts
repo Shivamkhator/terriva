@@ -151,13 +151,24 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
 
- callbacks: {
-    async session({ session, token }) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub // ✅ ALWAYS EXISTS
-      }
-      return session
+  cookies: {
+    state: {
+      name: `next-auth.state`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
     },
   },
+    callbacks: {
+      async session({ session, token }) {
+        if (session.user && token.sub) {
+          session.user.id = token.sub // ✅ ALWAYS EXISTS
+        }
+        return session
+      },
+    },
 
-};
+  };
