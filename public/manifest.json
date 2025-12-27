@@ -1,6 +1,7 @@
 {
   "name": "Terriva",
   "short_name": "Terriva",
+  "category": "Health & Fitness",
   "description": "Your insights, only yours.",
   "start_url": "/",
   "display": "standalone",

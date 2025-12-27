@@ -142,7 +142,6 @@ export default function TerrivaNavbar() {
 
                 {userMenuOpen && (
                   <div className="absolute right-0 mt-3 w-38 rounded-md bg-white border border-gray-200 shadow-lg py-1 z-99">
-                    <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setUserMenuOpen(false)}>Settings</Link>
                     <button onClick={() => signOut({ callbackUrl: "/" })} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</button>
                   </div>
                 )}
