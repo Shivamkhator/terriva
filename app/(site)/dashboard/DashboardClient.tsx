@@ -27,6 +27,12 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { type DateRange } from "react-day-picker";
 
+import { Session } from "next-auth";
+
+type DashboardClientProps = {
+  user: Session["user"];
+};
+
 function formatDate(date?: Date) {
     if (!date) return "";
     return date.toLocaleDateString("en-GB", {
@@ -55,7 +61,7 @@ const FLOW_STATES = [
     { value: 3, label: "Heavy", color: "#FCA5AC", textColor: "#2A2A2A" },
 ];
 
-export default function DashboardClient() {
+export default function DashboardClient({ user }: DashboardClientProps) {
     const [openFlowDate, setOpenFlowDate] = React.useState(false);
     const [flowDate, setFlowDate] = React.useState<Date | undefined>(undefined);
     const [flow, setFlow] = useState(1);
