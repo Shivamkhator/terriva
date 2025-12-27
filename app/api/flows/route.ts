@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const flows = await prisma.DailyFlow.findMany({
+    const flows = await prisma.dailyFlow.findMany({
       where: { userId: user.id },
       orderBy: { date: 'desc' },
     });
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     const { date, intensity } = await req.json();
 
-    const flow = await prisma.DailyFlow.upsert({
+    const flow = await prisma.dailyFlow.upsert({
       where: {
         userId_date: {
           userId: user.id,
