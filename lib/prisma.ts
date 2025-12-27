@@ -1,7 +1,9 @@
 import PrismaClient from "@prisma/client";
 
+type PrismaClientType = InstanceType<typeof PrismaClient>;
+
 const globalForPrisma = globalThis as unknown as {
-  prisma?: PrismaClient;
+  prisma?: PrismaClientType;
 };
 
 export const prisma =
