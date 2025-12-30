@@ -87,7 +87,7 @@ export default function InstallPrompt() {
           </p>
         </div>
       ) : (
-        <div className="flex flex-row items-center mt-2 justify-between">
+        <div className="flex flex-row items-center justify-between">
           <p id="install-title" className="font-semibold">Install Terriva on Home Screen</p>
           <Button
             onClick={installApp}
