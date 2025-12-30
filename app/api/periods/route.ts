@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { calculateInsights } from "@/lib/cycleInsights";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -48,14 +49,52 @@ export async function POST(req: NextRequest) {
     }
 
     const { startDate, endDate } = await req.json();
+    const start = new Date(startDate);
 
-    const period = await prisma.period.create({
-      data: {
+    const period = await prisma.period.upsert({
+      where: {
+        userId_startDate: {
+          userId: user.id,
+          startDate: start,
+        },
+      },
+      update: {
+        endDate: endDate ? new Date(endDate) : null,
+      },
+      create: {
         userId: user.id,
-        startDate: new Date(startDate),
+        startDate: start,
         endDate: endDate ? new Date(endDate) : null,
       },
     });
+
+    const allPeriods = await prisma.period.findMany({
+      where: { userId: user.id },
+    });
+
+    const insights = calculateInsights(allPeriods);
+
+    if (insights) {
+      await prisma.cycleInsight.upsert({
+        where: {
+          userId: session.user.id,
+        },
+        update: {
+          avgCycleLength: insights.avgCycleLength,
+          avgPeriodLength: insights.avgPeriodLength,
+          nextPeriodDate: insights.nextPeriodDate,
+          totalPeriods: insights.totalPeriods,
+        },
+        create: {
+          userId: session.user.id,
+          avgCycleLength: insights.avgCycleLength,
+          avgPeriodLength: insights.avgPeriodLength,
+          nextPeriodDate: insights.nextPeriodDate,
+          totalPeriods: insights.totalPeriods,
+        },
+      });
+
+    }
 
     return NextResponse.json(period);
   } catch (error) {

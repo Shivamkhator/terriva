@@ -39,7 +39,7 @@ const Slider = React.forwardRef<
         )}
         {...props}
       >
-        <SliderPrimitive.Track className='relative h-4 w-full grow overflow-hidden bg-white rounded-lg border border-gray-primary/20'>
+        <SliderPrimitive.Track className='relative h-3 w-full grow overflow-hidden bg-white rounded-lg border border-gray-primary/20'>
           <SliderPrimitive.Range
             className="absolute h-full transition-colors"
             style={{
@@ -57,7 +57,7 @@ const Slider = React.forwardRef<
         <>
           {initialValue.map((value, index) => (
             <React.Fragment key={index}>
-              <SliderPrimitive.Thumb className='relative grid h-6 w-3 cursor-grab place-content-center bg-white shadow-sm focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-white border border-gray-primary/60 rounded-full hover:bg-gray-300'>
+              <SliderPrimitive.Thumb className='relative grid h-5 w-2 cursor-grab place-content-center bg-white focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-white border border-gray-primary/90 rounded-full'>
                 {label && labelPosition !== 'static' && (
                   <div
                     className={cn(

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
     Tabs,
     TabsContent,
@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from "@/components/ui/slider";
-import { ChevronDown, Trash2, Save, Calendar as CalendarIcon, TrendingUp, Activity, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronRightIcon, Trash2, Save, Calendar as CalendarIcon, TrendingUp, Activity, Sparkles } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
     Popover,
@@ -26,11 +26,12 @@ import {
 } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { type DateRange } from "react-day-picker";
+import { useRouter } from "next/navigation";
 
 import { Session } from "next-auth";
 
 type DashboardClientProps = {
-  user: Session["user"];
+    user: Session["user"];
 };
 
 function formatDate(date?: Date) {
@@ -62,13 +63,18 @@ const FLOW_STATES = [
 ];
 
 export default function DashboardClient({ user }: DashboardClientProps) {
+    const [insights, setInsights] = React.useState<any | null>(null);
+    const [loadingInsights, setLoadingInsights] = React.useState(true);
     const [openFlowDate, setOpenFlowDate] = React.useState(false);
     const [flowDate, setFlowDate] = React.useState<Date | undefined>(undefined);
     const [flow, setFlow] = useState(1);
 
+    const router = useRouter();
+
     // Period tracking state
     const [openStart, setOpenStart] = React.useState(false);
-    const [openEnd, setOpenEnd] = React.useState(false);
+    const [openEnd, setOpenEnd] =
+        React.useState(false);
     const [hasEnded, setHasEnded] = React.useState(false);
     const [dateRange, setDateRange] = React.useState<DateRange>({
         from: undefined,
@@ -78,6 +84,12 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     const [periods, setPeriods] = React.useState<Period[]>([]);
     const [dailyFlows, setDailyFlows] = React.useState<DailyFlow[]>([]);
     const [historyMonth, setHistoryMonth] = React.useState<Date>(new Date());
+
+    const greeting = useMemo(
+        () => (Math.random() > 0.5 ? "Namaste" : "Konnichiwa"),
+        []
+    );
+
 
     const today = React.useMemo(() => {
         const t = new Date();
@@ -115,55 +127,36 @@ export default function DashboardClient({ user }: DashboardClientProps) {
         loadData();
     }, []);
 
+    // Sort periods by actual start date (most recent first) for display
+    const sortedPeriods = React.useMemo(() => {
+        return [...periods].sort((a, b) => b.startDate.getTime() - a.startDate.getTime());
+    }, [periods]);
 
-    // Calculate insights
-    const insights = React.useMemo(() => {
-        if (periods.length < 2) return null;
-
-        const completedPeriods = periods
-            .filter(p => p.endDate)
-            .sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-
-        if (completedPeriods.length < 2) return null;
-
-        // Average cycle length (time between periods)
-        let cycleLengths: number[] = [];
-        for (let i = 1; i < completedPeriods.length; i++) {
-            const daysBetween = Math.round(
-                (completedPeriods[i].startDate.getTime() - completedPeriods[i - 1].startDate.getTime())
-                / (1000 * 60 * 60 * 24)
-            );
-            cycleLengths.push(daysBetween);
-        }
-
-        const avgCycle = cycleLengths.length > 0
-            ? Math.round(cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length)
-            : null;
-
-        // Average period length
-        const periodLengths = completedPeriods.map(p => {
-            const start = new Date(p.startDate);
-            const end = new Date(p.endDate!);
-            return Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-        });
-
-        const avgPeriodLength = Math.round(
-            periodLengths.reduce((a, b) => a + b, 0) / periodLengths.length
-        );
-
-        // Predict next period
-        const lastPeriod = completedPeriods[completedPeriods.length - 1];
-        const nextPredicted = avgCycle
-            ? new Date(lastPeriod.startDate.getTime() + avgCycle * 24 * 60 * 60 * 1000)
-            : null;
-
-        return {
-            avgCycle,
-            avgPeriodLength,
-            nextPredicted,
-            totalPeriods: completedPeriods.length,
+    useEffect(() => {
+        let isMounted = true;
+        const loadInsights = async () => {
+            try {
+                const res = await fetch("/api/insights");
+                if (!res.ok) {
+                    if (isMounted)
+                        setInsights(null);
+                } else {
+                    const data = await res.json();
+                    if (isMounted) {
+                        setInsights(data);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load insights", err);
+                setInsights(null);
+            } finally {
+                setLoadingInsights(false);
+            }
         };
-    }, [periods, dailyFlows]);
+
+        loadInsights();
+        return () => { isMounted = false; };
+    }, [periods.length, flowDate]);
 
     const startDate = dateRange?.from ? formatDate(dateRange.from) : "Start date";
     const endDate = dateRange?.to ? formatDate(dateRange.to) : "End date";
@@ -295,65 +288,53 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     return (
         <div className="min-h-screen">
             <div className="flex w-full max-w-5xl mx-auto flex-col gap-6 p-4 md:p-8">
+
                 {/* Header */}
-                <div className="text-center space-y-2 pb-2">
-                    <h1 className="text-5xl font-bold bg-linear-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                        Dashboard
-                    </h1>
-                    <p className="text-muted-foreground text-xs md:text-base">
-                        Track your cycle with ease & privacy
-                    </p>
-                </div>
+                <div className="relative mb-4 overflow-hidden rounded-2xl bg-primary p-8 text-white">
 
-                {/* Insights Card */}
-                {insights && (
-                    <Card className="bg-white/80 backdrop-blur-sm border-pink-100 shadow-xl">
-                        <CardHeader>
-                            <CardTitle className="flex items-center justify-center gap-2 text-pink-900">
-                                <Sparkles className="h-5 w-5 text-pink-500" />
-                                Your Cycle Insights
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="bg-linear-to-br from-pink-50 to-pink-100 rounded-xl p-4 border border-pink-200 shadow-sm">
-                                    <p className="text-xs text-pink-700 mb-1 font-medium">Average Cycle Length</p>
-                                    <p className="text-3xl font-bold text-pink-600">{insights.avgCycle}</p>
-                                    <p className="text-xs text-pink-600 mt-1">days</p>
-                                </div>
-                                <div className="bg-linear-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200 shadow-sm">
-                                    <p className="text-xs text-purple-700 mb-1 font-medium">Average Period Length</p>
-                                    <p className="text-3xl font-bold text-purple-600">{insights.avgPeriodLength}</p>
-                                    <p className="text-xs text-purple-600 mt-1">days</p>
-                                </div>
-                                <div className="bg-linear-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200 shadow-sm">
-                                    <p className="text-xs text-blue-700 mb-1 font-medium">Total Periods Tracked</p>
-                                    <p className="text-3xl font-bold text-blue-600">{insights.totalPeriods}</p>
+                    <div className="pointer-events-none absolute -top-1/2 -right-[10%] h-[200px] w-[300px] rounded-full bg-white/10"></div>
+                    <div className="pointer-events-none absolute -bottom-[30%] -left-[5%] h-[200px] w-[200px] rounded-full bg-white/10"></div>
 
+                    <div className="relative z-10">
+                        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                            <div>
+                                <div className="mb-2 text-2xl md:text-3xl font-semibold">
+                                    <span className="items-center gap-2">
+                                        {greeting}, {user.name?.split(" ")[0]}!
+                                    </span>
                                 </div>
-                                <div className="bg-linear-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200 shadow-sm">
-                                    <p className="text-xs text-indigo-700 mb-1 font-medium">Next Period Prediction</p>
-                                    <p className="text-lg font-bold text-indigo-600 mt-2">
-                                        {insights.nextPredicted ? formatDate(insights.nextPredicted) : 'N/A'}
-                                    </p>
-                                </div>
+                                <p className="opacity-70 text-sm flex items-center gap-1">
+                                    {insights ? (<>Your insights are ready to be explored <Sparkles className="h-4 w-4 text-pink-400" /></>) : ("Track more cycles to unlock personalized insights")}
+                                </p>
                             </div>
-                        </CardContent>
-                    </Card>
-                )}
+
+                            <div className="text-left md:text-right">
+
+                                {insights ? (<Button onClick={() => router.push("/insights")} className="bg-white/20 hover:bg-white/30 text-white font-medium h-10 flex items-center gap-2">
+                                    View Insights
+                                    <ChevronRightIcon className=" hidden md:block h-4 w-4" />
+                                </Button>) : (<Button className="bg-white/20 text-white font-medium h-10 flex items-center gap-2" disabled>
+                                    Yet to Unlock
+                                </Button>)}
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
 
                 {/* Main Tabs */}
                 <Tabs defaultValue="flow" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 bg-white/80 backdrop-blur-sm">
-                        <TabsTrigger value="flow" className="data-[state=active]:bg-pink-100 data-[state=active]:text-pink-900">
+                    <TabsList className="w-full bg-white/80 backdrop-blur-sm">
+                        <TabsTrigger value="flow" className="text-gray-primary data-[state=active]:text-primary rounded-2xl">
                             Daily Flow
                         </TabsTrigger>
-                        <TabsTrigger value="periods" className="data-[state=active]:bg-pink-100 data-[state=active]:text-pink-900">
+                        <TabsTrigger value="periods" className="text-gray-primary data-[state=active]:text-primary rounded-2xl">
                             Track Period
                         </TabsTrigger>
                     </TabsList>
 
-                    <Card className="shadow-xl bg-white/80 backdrop-blur-sm border-pink-100 mt-4">
+                    <Card className="bg-white/80 backdrop-blur-sm border-pink-100">
                         <TabsContents>
                             <TabsContent value="flow">
                                 <CardContent>
@@ -384,7 +365,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                                 key={f.value}
                                                                 onClick={() => setFlow(f.value)}
                                                                 className={`p-2 px-[2.5vw] md:px-[5vw] rounded-lg border-2 transition-all duration-200 ${flow === f.value
-                                                                    ? 'border-pink-400 shadow-md scale-105'
+                                                                    ? 'border-pink-400 scale-105'
                                                                     : 'border-gray-200 hover:border-pink-200'
                                                                     }`}
                                                                 style={{
@@ -405,7 +386,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
                                             <Button
                                                 onClick={handleLogFlow}
-                                                className="w-full h-12 bg-linear-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white shadow-lg"
+                                                className="w-full h-12 bg-primary text-white"
                                             >
                                                 <Save className="h-4 w-4 mr-2" /> Save Today's Flow
                                             </Button>
@@ -429,7 +410,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                             setDateRange((prev) => ({ from: prev.from, to: undefined }));
                                                         }
                                                     }}
-                                                    className="border-pink-400 data-[state=checked]:bg-pink-500"
+                                                    className="border-pink-400 data-[state=checked]:bg-primary"
                                                 />
                                                 <Label htmlFor="has-ended" className="text-sm font-medium cursor-pointer">
                                                     My period has ended
@@ -536,15 +517,17 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                             {periodLength && dateRange.from && dateRange.to && (
                                                 <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
                                                     <p className="text-sm text-purple-700">
-                                                        <span className="font-semibold">Duration:</span> {periodLength} day{periodLength > 1 ? "s" : ""}
+                                                        {periodLength < 1 ? <span className="text-red-600"> End date cannot be before start date</span> : (<>
+
+                                                            <span className="font-semibold">Duration:</span> {periodLength} day{periodLength > 1 ? "s" : ""}</>)}
                                                     </p>
                                                 </div>
                                             )}
 
                                             <Button
                                                 onClick={handleSavePeriod}
-                                                disabled={!dateRange.from}
-                                                className="w-full h-12 bg-linear-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white shadow-lg mb-4"
+                                                disabled={!dateRange.from || (hasEnded && !dateRange.to) || (hasEnded && dateRange.to! < dateRange.from!)}
+                                                className="w-full h-12 bg-primary text-white mb-4"
                                             >
                                                 <CalendarIcon className="h-4 w-4 mr-2" /> Save Period
                                             </Button>
@@ -557,18 +540,18 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                 </Tabs>
 
                 {/* History Calendar */}
-                <Card className="shadow-xl bg-white/80 backdrop-blur-sm border-pink-100">
+                <Card className="bg-white/80 backdrop-blur-sm border-pink-100">
                     <CardHeader>
                         <CardTitle className="flex items-center justify-center gap-2">
                             <Activity className="h-5 w-5 text-pink-500" />
-                            Cycle Dashboard
+                            Cycle History
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         {periods.length === 0 && dailyFlows.length === 0 ? (
                             <div className="text-center py-12">
-                                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-pink-100 flex items-center justify-center">
-                                    <CalendarIcon className="h-10 w-10 text-pink-400" />
+                                <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                                    <CalendarIcon className="h-16 w-16 text-pink-400" />
                                 </div>
                                 <p className="text-sm text-muted-foreground mb-2">No tracking data yet</p>
                                 <p className="text-xs text-muted-foreground">Start logging your periods and daily flow above!</p>
@@ -638,7 +621,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
                                                     {/* Tooltip */}
                                                     {(flowState || isPeriodDay) && (
-                                                        <div className="absolute bottom-full mb-2 hidden group-hover:flex bg-gray-900 text-white text-xs rounded-lg px-3 py-1.5 whitespace-nowrap z-10 shadow-lg">
+                                                        <div className="absolute bottom-full mb-2 hidden group-hover:flex bg-gray-900 text-white text-xs rounded-lg px-3 py-1.5 whitespace-nowrap z-10">
                                                             {(flowState && isPeriodDay) ? `Day ${periodDayNumber} with ${flowState.label} Flow` : isPeriodDay ? `Day ${periodDayNumber}` : flowState ? `${flowState.label} Flow` : ''}
                                                         </div>
                                                     )}
@@ -654,47 +637,44 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
                 {/* Period Records */}
                 {periods.length > 0 && (
-                    <Card className="shadow-xl bg-white/80 backdrop-blur-sm border-pink-100 mb-24">
+                    <Card className="bg-white/80 backdrop-blur-sm border-pink-100 mb-24">
                         <CardHeader>
                             <CardTitle className="flex items-center justify-center gap-2">
                                 <TrendingUp className="h-5 w-5 text-pink-500" />
-                                Period History
+                                Past Periods
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-3">
-                                {periods
-                                    .slice()
-                                    .reverse()
-                                    .map((period) => {
-                                        const start = new Date(period.startDate);
-                                        const end = period.endDate ? new Date(period.endDate) : start;
-                                        const length = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                                {sortedPeriods.map((period) => {
+                                    const start = new Date(period.startDate);
+                                    const end = period.endDate ? new Date(period.endDate) : start;
+                                    const length = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-                                        return (
-                                            <div
-                                                key={period.id}
-                                                className="flex justify-between items-center p-4 bg-linear-to-r from-pink-50 to-purple-50 rounded-xl border-2 border-pink-100 hover:shadow-md transition-all group"
-                                            >
-                                                <div>
-                                                    <p className="font-semibold text-sm text-gray-800">
-                                                        {formatDate(period.startDate)} → {period.endDate ? formatDate(period.endDate) : "Ongoing"}
-                                                    </p>
-                                                    <p className="text-xs text-gray-600 mt-1">
-                                                        Duration: <span className="font-medium text-pink-600">{length} day{length > 1 ? "s" : ""}</span>
-                                                    </p>
-                                                </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => deletePeriod(period.id)}
-                                                    className="hover:bg-red-100 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                    return (
+                                        <div
+                                            key={period.id}
+                                            className="flex justify-between items-center p-4 bg-linear-to-r from-pink-50 to-purple-50 rounded-xl border-2 border-pink-100 hover:shadow-md transition-all group"
+                                        >
+                                            <div>
+                                                <p className="font-semibold text-sm text-gray-800">
+                                                    {formatDate(period.startDate)} → {period.endDate ? formatDate(period.endDate) : "Ongoing"}
+                                                </p>
+                                                <p className="text-xs text-gray-600 mt-1">
+                                                    Duration: <span className="font-medium text-pink-600">{length} day{length > 1 ? "s" : ""}</span>
+                                                </p>
                                             </div>
-                                        );
-                                    })}
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => deletePeriod(period.id)}
+                                                className="transition-colors opacity-100"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </CardContent>
                     </Card>

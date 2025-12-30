@@ -14,7 +14,7 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu"
 
-export default function TerrivaNavbar() {
+export default function Navbar() {
   const { data: session, status } = useSession()
   const pathname = usePathname()
   const [userMenuOpen, setUserMenuOpen] = React.useState(false)
@@ -52,7 +52,7 @@ export default function TerrivaNavbar() {
         <polyline points="16 17 21 12 16 7" />
         <line x1="21" y1="12" x2="9" y2="12" />
       </svg>
-    )
+    ),
   };
 
   const handlePrimaryHoverEnter = (e: MouseEvent<HTMLButtonElement>) => {
@@ -128,23 +128,12 @@ export default function TerrivaNavbar() {
                 Login
               </button>
             ) : (
-              <div className="relative">
-                <button
-                  onClick={() => setUserMenuOpen((s) => !s)}
-                  className="inline-flex items-center gap-2 rounded-md py-1 text-sm font-medium cursor-pointer"
-                >
+              <div className="relative inline-flex items-center gap-2 rounded-md py-1 text-sm font-medium">
+                
                   <span className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-[#2F4F4F] text-sm">
-                    {session.user?.name ? session.user.name.charAt(0).toUpperCase() : "U"}
+                    {session.user.image ? session.user.name?.charAt(0).toUpperCase() : "U"}
                   </span>
-                  <span className="hidden lg:inline-block text-white/80 font-semibold">{session.user?.name}</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform ${userMenuOpen ? "rotate-180" : ""}`}><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-
-                {userMenuOpen && (
-                  <div className="absolute right-0 mt-3 w-38 rounded-md bg-white border border-gray-200 shadow-lg py-1 z-99">
-                    <button onClick={() => signOut({ callbackUrl: "/" })} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Logout</button>
-                  </div>
-                )}
+                  <span className="hidden lg:inline-block text-white font-semibold">{session.user?.name}</span>
               </div>
             )}
           </div>

@@ -138,11 +138,6 @@ body {
   }
 }
 
-
-
-
-
-
 section.bg-primary a[href*="instagram.com/weareskybee"] {
   all: unset;
   display: inline-block;
@@ -151,7 +146,7 @@ section.bg-primary a[href*="instagram.com/weareskybee"] {
   color: #2F4F4F;
   position: relative;
   margin: auto;
-  padding: 1rem 1.4rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 9999px;
   transition: transform 0.2s ease;
   overflow: visible;

@@ -26,7 +26,7 @@ export const authOptions: NextAuthOptions = {
         },
         secure: false,
         tls: {
-          rejectUnauthorized: false,
+          rejectUnauthorized: true,
         },
       },
       from: process.env.EMAIL_FROM,

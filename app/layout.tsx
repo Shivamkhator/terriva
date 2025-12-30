@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Noto_Serif } from "next/font/google"
 import InstallPrompt from "@/components/InstallPrompt";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const notoSerif = Noto_Serif({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+  weight: ["400", "700"],
+})
 
 export const metadata: Metadata = {
   title: "Terriva",
@@ -45,9 +40,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Terriva" />
 
+
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={notoSerif.className}
       >
         <InstallPrompt />
         <SessionProviderWrapper>

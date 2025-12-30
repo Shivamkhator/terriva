@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
-import {prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { calculateInsights } from "@/lib/cycleInsights"
 
 export async function DELETE(
   req: Request,
@@ -31,6 +32,41 @@ export async function DELETE(
     await prisma.period.delete({
       where: { id },
     })
+
+    const allPeriods = await prisma.period.findMany({
+      where: { userId: session.user.id },
+    });
+    
+    const insights = calculateInsights(allPeriods);
+
+    if (insights) {
+      await prisma.cycleInsight.upsert({
+        where: {
+          userId: session.user.id,
+        },
+        update: {
+          avgCycleLength: insights.avgCycleLength,
+          avgPeriodLength: insights.avgPeriodLength,
+          nextPeriodDate: insights.nextPeriodDate,
+          totalPeriods: insights.totalPeriods,
+        },
+        create: {
+          userId: session.user.id,
+          avgCycleLength: insights.avgCycleLength,
+          avgPeriodLength: insights.avgPeriodLength,
+          nextPeriodDate: insights.nextPeriodDate,
+          totalPeriods: insights.totalPeriods,
+        },
+      });
+
+    }
+
+    if(allPeriods.length < 2) {
+      await prisma.cycleInsight.deleteMany({
+        where: { userId: session.user.id },
+      });
+    }
+
 
     return NextResponse.json({ success: true })
   } catch (error) {
