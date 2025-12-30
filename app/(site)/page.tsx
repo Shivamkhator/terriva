@@ -7,7 +7,6 @@ import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
 import { ArrowRight, ArrowDown, Activity, Calendar, PieChart, Shield } from "lucide-react"
 import { useSession } from "next-auth/react";
 import { PreviewCard, PreviewCardPanel, PreviewCardTrigger } from "@/components/animate-ui/components/base/preview-card";
-import FloatingDate from "@/components/ui/FloatingDate"
 
 const features = [
     {
@@ -53,6 +52,9 @@ export default function PeriodTrackerHome() {
         </div>
     )
 }
+const date = new Date();
+const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' };
+const dateString = date.toLocaleDateString(undefined, options);
 
 function HeroSection() {
     // --- Movement state ---
@@ -75,16 +77,21 @@ function HeroSection() {
 
     return (
         <section className="relative z-10 h-screen w-full flex flex-col justify-between p-4 md:p-12 border-b border-primary/10">
-            <nav className="flex justify-between items-start uppercase tracking-widest text-sm md:text-md font-bold text-gray-primary/80">
-                <div>Terriva by SkyBee</div>
+            <nav className="flex flex-col md:flex-row justify-between items-start uppercase tracking-widest text-sm md:text-md font-bold text-gray-primary/80">
+                <div>
+                    Terriva by SkyBee
+                </div>
+                <div className="text-xs md:text-sm tracking-[0.3em] text-black italic" >
+                    {dateString}
+                </div>
 
             </nav>
 
             <div className="mt-auto mb-[6vh] md:mb-[4vh] mr-2 md:mr-6">
-                <h1 className="text-[22vw] md:text-[15vw] leading-[0.85] font-bold text-primary tracking-tighter uppercase mix-blend-darken pb-12 md:pb-0">
+                <h1 className="text-[22vw] md:text-[15vw] leading-[0.85] font-bold text-primary tracking-tighter uppercase mix-blend-darken pb-[8vh] md:pb-0">
                     Clarity <span className="block italic font-serif font-light text-accent-foreground ml-[9vw]">Every</span> Month
                 </h1>
-                <div className="flex flex-col md:flex-row justify-between items-end border-t border-primary/30 py-4 md:pt-2">
+                <div className="flex flex-col md:flex-row justify-between items-end border-t border-primary/30 py-[4vh] ">
                     <p className="max-w-md text-xl text-gray-primary leading-relaxed">
                         Your Insights, Only Yours. <br />
                         <span className="opacity-85 text-sm">Scroll to sync.</span>
@@ -153,8 +160,6 @@ function SidebarUI({ scrollYProgress, totalSlides }: { scrollYProgress: MotionVa
     })
 
     return (
-        <>
-        <FloatingDate/>
         <div className="absolute inset-0 pointer-events-none px-6 md:px-12 flex justify-between items-center z-30">
             <div className="h-full flex flex-col justify-center">
                 <div className="overflow-hidden h-16rem flex items-end">
@@ -162,7 +167,6 @@ function SidebarUI({ scrollYProgress, totalSlides }: { scrollYProgress: MotionVa
                 </div>
             </div>
         </div>
-        </>
     )
 }
 

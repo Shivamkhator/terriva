@@ -399,29 +399,8 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                 <CardContent>
                                     <div className="space-y-6">
                                         <div className="space-y-4">
-                                            <div className="flex items-center gap-3 p-4 mt-6 bg-pink-50 rounded-lg border border-pink-200">
-                                                <Checkbox
-                                                    id="has-ended"
-                                                    checked={hasEnded}
-                                                    onCheckedChange={(checked) => {
-                                                        const value = checked === true;
-                                                        setHasEnded(value);
-                                                        if (!value) {
-                                                            setDateRange((prev) => ({ from: prev.from, to: undefined }));
-                                                        }
-                                                    }}
-                                                    className="border-pink-400 data-[state=checked]:bg-primary"
-                                                />
-                                                <Label htmlFor="has-ended" className="text-sm font-medium cursor-pointer">
-                                                    My period has ended
-                                                </Label>
-                                            </div>
-
-                                            <div className="space-y-3">
+                                            <div className="space-y-3 mt-6">
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="start-date" className="text-sm font-medium">
-                                                        Start Date
-                                                    </Label>
                                                     <Popover open={openStart} onOpenChange={setOpenStart}>
                                                         <PopoverTrigger asChild>
                                                             <Button
@@ -464,11 +443,26 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                     </Popover>
                                                 </div>
 
+                                                <div className="flex items-center gap-3 p-4 mt-6 bg-pink-50 rounded-lg border border-pink-200">
+                                                    <Checkbox
+                                                        id="has-ended"
+                                                        checked={hasEnded}
+                                                        onCheckedChange={(checked) => {
+                                                            const value = checked === true;
+                                                            setHasEnded(value);
+                                                            if (!value) {
+                                                                setDateRange((prev) => ({ from: prev.from, to: undefined }));
+                                                            }
+                                                        }}
+                                                        className="border-pink-400 data-[state=checked]:bg-primary"
+                                                    />
+                                                    <Label htmlFor="has-ended" className="text-sm font-medium cursor-pointer">
+                                                        My period has ended
+                                                    </Label>
+                                                </div>
+
                                                 {hasEnded && (
                                                     <div className="space-y-2">
-                                                        <Label htmlFor="end-date" className="text-sm font-medium">
-                                                            End Date
-                                                        </Label>
                                                         <Popover open={openEnd} onOpenChange={setOpenEnd}>
                                                             <PopoverTrigger asChild>
                                                                 <Button

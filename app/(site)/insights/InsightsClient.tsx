@@ -278,7 +278,7 @@ export default function InsightsClient({ user }: CycleClientProps) {
                         </div>
                     </div>
                     <div className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-7 lg:row-span-1">
-                        <h3 className="font-semibold text-gray-500 mb-4">Periods History</h3>
+                        <h3 className="font-semibold text-gray-500 mb-4">Average Periods Length </h3>
 
                         <LineChart data={monthlyPeriodData} />
                     </div>
