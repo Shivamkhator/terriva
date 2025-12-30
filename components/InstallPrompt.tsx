@@ -80,7 +80,7 @@ export default function InstallPrompt() {
 
   return (
     <div 
-      className="fixed bottom-5 left-1/2 z-50 w-[90%] max-w-sm -translate-x-1/2 rounded-xl bg-primary px-4 py-3 text-center text-background shadow-lg animate-in slide-in-from-bottom-3 duration-300"
+      className="fixed bottom-5 left-1/2 z-999 w-[90%] max-w-sm -translate-x-1/2 rounded-xl bg-primary px-4 py-3 text-center text-background shadow-lg animate-in slide-in-from-bottom-3 duration-300"
       role="dialog"
       aria-labelledby="install-title"
     >
@@ -106,7 +106,7 @@ export default function InstallPrompt() {
           <p id="install-title" className="text-lg font-semibold">Install Terriva</p>
           <Button
             onClick={installApp}
-            className="mt-2 bg-accent text-white hover:bg-accent/90"
+            className="mt-2 bg-white text-primary hover:bg-accent/90"
           >
             Install
           </Button>
