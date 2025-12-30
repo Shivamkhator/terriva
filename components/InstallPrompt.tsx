@@ -15,9 +15,6 @@ export default function InstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false)
 
   useEffect(() => {
-    // Check if user previously dismissed
-    const hidePrompt = localStorage.getItem("hideInstallPrompt")
-    if (hidePrompt === "true") return
 
     // iOS detection
     const ua = window.navigator.userAgent.toLowerCase()
@@ -47,8 +44,7 @@ export default function InstallPrompt() {
 
   // Show iOS helper if not installed
   useEffect(() => {
-    const hidePrompt = localStorage.getItem("hideInstallPrompt")
-    if (isIOS && !isInstalled && hidePrompt !== "true") {
+    if (isIOS && !isInstalled) {
       setShowPrompt(true)
     }
   }, [isIOS, isInstalled])
@@ -71,10 +67,6 @@ export default function InstallPrompt() {
     }
   }
 
-  const dismissPrompt = () => {
-    localStorage.setItem("hideInstallPrompt", "true")
-    setShowPrompt(false)
-  }
 
   if (!showPrompt || isInstalled) return null
 
@@ -84,19 +76,12 @@ export default function InstallPrompt() {
       role="dialog"
       aria-labelledby="install-title"
     >
-      <button
-        onClick={dismissPrompt}
-        className="absolute right-2 top-2 rounded text-sm text-white/60 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white/50"
-        aria-label="Close install prompt"
-      >
-        ✕
-      </button>
       
       {isIOS ? (
         <div className="flex flex-col items-center">
           <p id="install-title" className="font-semibold">Install Terriva on Home Screen</p>
           <p className="font-semibold text-sm">
-            Tap   ⋮   and then
+            Tap ⋮ and then
             <br/>
             <span className="font-semibold text-sm">Add to Home Screen</span>
           </p>
