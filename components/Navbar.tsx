@@ -55,14 +55,6 @@ export default function Navbar() {
     ),
   };
 
-  const handlePrimaryHoverEnter = (e: MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.boxShadow = "8px 8px 2px rgb(0, 0, 0)";
-  };
-
-  const handlePrimaryHoverLeave = (e: MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.boxShadow = "2px 2px 1px rgb(0, 0, 0)";
-  };
-
 
   const navItems = [
     { id: 'home', path: '/', label: 'Home', icon: icons.home },
@@ -121,10 +113,9 @@ export default function Navbar() {
 
           <div className="flex items-center pr-16">
             {!isLoggedIn ? (
-              <button onClick={() => signIn()} className="bg-white px-4 py-2 rounded-md text-[#2F4F4F] font-medium text-sm transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5" style={{
+              <button onClick={() => signIn()} className="bg-white px-4 py-2 rounded-md text-[#2F4F4F] font-medium text-sm transition-all" style={{
                 border: "0.5px solid #2a2a2a",
-                boxShadow: "2px 2px 1px rgb(0, 0, 0)",
-              }} onMouseEnter={handlePrimaryHoverEnter} onMouseLeave={handlePrimaryHoverLeave}>
+              }}>
                 Login
               </button>
             ) : (

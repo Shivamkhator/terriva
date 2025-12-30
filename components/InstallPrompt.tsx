@@ -86,31 +86,30 @@ export default function InstallPrompt() {
     >
       <button
         onClick={dismissPrompt}
-        className="absolute right-2 top-2 rounded p-1 text-xs text-white/60 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white/50"
+        className="absolute right-2 top-2 rounded p-1 text-sm text-white/60 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white/50"
         aria-label="Close install prompt"
       >
         ✕
       </button>
       
       {isIOS ? (
-        <>
+        <div className="flex flex-col items-center">
           <p id="install-title" className="font-semibold">Install Terriva</p>
-          <p className="mt-1 text-xs leading-relaxed opacity-90">
-            Tap <span className="font-semibold">Share</span> 📤 then
-            <br />
+          <p className="mt-1 text-sm leading-relaxed opacity-90">
+            Tap <span className="inline-block  font-bold rotate-90">⋮</span> and then
             <span className="font-semibold">Add to Home Screen</span>
           </p>
-        </>
+        </div>
       ) : (
-        <>
-          <p id="install-title" className="text-lg font-semibold">Install Terriva</p>
+        <div className="flex flex-col items-center">
+          <p id="install-title" className="text-lg font-semibold">Terriva</p>
           <Button
             onClick={installApp}
-            className="mt-2 bg-white text-primary hover:bg-accent/90"
+            className="bg-white text-primary hover:bg-accent/90"
           >
             Install
           </Button>
-        </>
+        </div>
       )}
     </div>
   )

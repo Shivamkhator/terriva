@@ -40,6 +40,8 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Terriva" />
 
 
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
       </head>
       <body
         className={notoSerif.className}
