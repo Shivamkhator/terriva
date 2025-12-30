@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from "@/components/ui/slider";
-import { ChevronDown, ChevronRightIcon, Trash2, Save, Calendar as CalendarIcon, TrendingUp, Activity, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronRightIcon, Trash2, Save, Calendar as CalendarIcon, TrendingUp, Activity} from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
     Popover,
@@ -304,7 +304,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                     </span>
                                 </div>
                                 <p className="opacity-70 text-sm flex items-center gap-1">
-                                    {insights ? (<>Your insights are ready to be explored <Sparkles className="h-4 w-4 text-pink-400" /></>) : ("Track more cycles to unlock personalized insights")}
+                                    {insights ? ("Your insights are ready to be explored") : ("Track more cycles to unlock personalized insights")}
                                 </p>
                             </div>
 

@@ -7,7 +7,6 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from "next/navigation";
 import { ChevronRightIcon } from "lucide-react"
 import { Button } from '@/components/ui/button';
-import { Sparkles } from 'lucide-react';
 
 type CycleClientProps = {
     user: Session["user"];
@@ -219,7 +218,6 @@ export default function InsightsClient({ user }: CycleClientProps) {
                                 </div>
                                 <p className="opacity-70 text-sm flex items-center gap-1">
                                     Track more cycles to make insights more accurate
-                                    <Sparkles className="inline-block w-4 h-4 text-pink-400" />
                                 </p>
                             </div>
 
@@ -253,7 +251,6 @@ export default function InsightsClient({ user }: CycleClientProps) {
                             <div className="relative p-4 bg-linear-to-r from-pink-50 to-purple-50 rounded-xl border-2 border-pink-100 hover:shadow-md transition-all group ">
                                 <div className="flex items-center gap-2 mb-1">
                                     <span className="text-sm font-bold text-pink-700">Pro Metrics</span>
-                                    <Sparkles className="w-4 h-4 text-pink-500" />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
 

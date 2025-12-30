@@ -60,20 +60,12 @@ function HeroSection() {
     // --- Movement state ---
     const mode = "scroll";
 
-    const [x, setX] = React.useState(0);
-    const [y, setY] = React.useState(0);
-
 
 
     // --- Scroll parallax ---
     const { scrollY } = useScroll();
-    let scrollYProgress = useTransform(scrollY, [0, 1000], [0, 920]);
-    React.useEffect(() => {
-        const unsub = (scrollYProgress as any).onChange((val: number) => {
-            setY(val);
-        });
-        return () => unsub && unsub();
-    }, [mode, scrollYProgress]);
+    const y = useTransform(scrollY, [0, 1000], [0, 920])
+
 
     return (
         <section className="relative z-10 h-screen w-full flex flex-col justify-between p-4 md:p-12 border-b border-primary/10">
@@ -103,7 +95,7 @@ function HeroSection() {
             </div>
 
             <motion.div
-                style={{ x, y }}
+                style={{ y }}
                 className=" absolute -z-1 top-[8vh] md:right-8 pointer-events-none"
             >
                 <Image
