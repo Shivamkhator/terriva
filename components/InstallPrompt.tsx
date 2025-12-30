@@ -94,15 +94,16 @@ export default function InstallPrompt() {
       
       {isIOS ? (
         <div className="flex flex-col items-center">
-          <p id="install-title" className="font-semibold">Install Terriva</p>
+          <p id="install-title" className="font-semibold text-lg">Install Terriva on Home Screen</p>
           <p className="mt-1 text-sm leading-relaxed opacity-90">
-            Tap <span className="inline-block  font-bold rotate-90">⋮</span> and then
+            Tap <div className="inline-block text-xl font-bold rotate-90">⋮</div> and then
+            <br/>
             <span className="font-semibold">Add to Home Screen</span>
           </p>
         </div>
       ) : (
-        <div className="flex flex-col items-center">
-          <p id="install-title" className="text-lg font-semibold">Terriva</p>
+        <div className="flex flex-row items-center">
+          <p id="install-title" className="text-xl font-semibold">Terriva</p>
           <Button
             onClick={installApp}
             className="bg-white text-primary hover:bg-accent/90"
