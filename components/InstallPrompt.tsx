@@ -1,8 +1,13 @@
 "use client"
-
+import { Button } from "./ui/button"
 import { useEffect, useState } from "react"
 
-let deferredPrompt: any = null
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
+
+let deferredPrompt: BeforeInstallPromptEvent | null = null
 
 export default function InstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false)
@@ -10,7 +15,11 @@ export default function InstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false)
 
   useEffect(() => {
-    // iOS detection (safe on client)
+    // Check if user previously dismissed
+    const hidePrompt = localStorage.getItem("hideInstallPrompt")
+    if (hidePrompt === "true") return
+
+    // iOS detection
     const ua = window.navigator.userAgent.toLowerCase()
     const ios = /iphone|ipad|ipod/.test(ua)
     setIsIOS(ios)
@@ -18,15 +27,14 @@ export default function InstallPrompt() {
     // Detect standalone mode (already installed)
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
-      // @ts-ignore
-      window.navigator.standalone === true
+      (window.navigator as any).standalone === true
 
     setIsInstalled(standalone)
 
     // Chrome / Android install event
-    const handler = (e: any) => {
+    const handler = (e: Event) => {
       e.preventDefault()
-      deferredPrompt = e
+      deferredPrompt = e as BeforeInstallPromptEvent
       setShowPrompt(true)
     }
 
@@ -39,7 +47,8 @@ export default function InstallPrompt() {
 
   // Show iOS helper if not installed
   useEffect(() => {
-    if (isIOS && !isInstalled) {
+    const hidePrompt = localStorage.getItem("hideInstallPrompt")
+    if (isIOS && !isInstalled && hidePrompt !== "true") {
       setShowPrompt(true)
     }
   }, [isIOS, isInstalled])
@@ -47,60 +56,62 @@ export default function InstallPrompt() {
   const installApp = async () => {
     if (!deferredPrompt) return
 
-    deferredPrompt.prompt()
-    await deferredPrompt.userChoice
+    try {
+      await deferredPrompt.prompt()
+      const { outcome } = await deferredPrompt.userChoice
+      
+      if (outcome === 'accepted') {
+        console.log('PWA installed')
+      }
+    } catch (error) {
+      console.error('Installation failed:', error)
+    } finally {
+      deferredPrompt = null
+      setShowPrompt(false)
+    }
+  }
 
-    deferredPrompt = null
+  const dismissPrompt = () => {
+    localStorage.setItem("hideInstallPrompt", "true")
     setShowPrompt(false)
   }
 
   if (!showPrompt || isInstalled) return null
 
   return (
-    <div style={styles.container}>
+    <div 
+      className="fixed bottom-5 left-1/2 z-50 w-[90%] max-w-sm -translate-x-1/2 rounded-xl bg-primary px-4 py-3 text-center text-background shadow-lg animate-in slide-in-from-bottom-3 duration-300"
+      role="dialog"
+      aria-labelledby="install-title"
+    >
+      <button
+        onClick={dismissPrompt}
+        className="absolute right-2 top-2 rounded p-1 text-xs text-white/60 transition-colors hover:text-white focus:outline-none focus:ring-2 focus:ring-white/50"
+        aria-label="Close install prompt"
+      >
+        ✕
+      </button>
+      
       {isIOS ? (
         <>
-          <p><strong>Install Terriva</strong></p>
-          <p style={{ fontSize: 14 }}>
-            Tap <strong>Share</strong> 📤 then <br />
-            <strong>Add to Home Screen</strong>
+          <p id="install-title" className="font-semibold">Install Terriva</p>
+          <p className="mt-1 text-xs leading-relaxed opacity-90">
+            Tap <span className="font-semibold">Share</span> 📤 then
+            <br />
+            <span className="font-semibold">Add to Home Screen</span>
           </p>
         </>
       ) : (
         <>
-          <p>Install Terriva for a better experience 🚀</p>
-          <button onClick={installApp} style={styles.button}>
-            Install App
-          </button>
+          <p id="install-title" className="text-lg font-semibold">Install Terriva</p>
+          <Button
+            onClick={installApp}
+            className="mt-2 bg-accent text-white hover:bg-accent/90"
+          >
+            Install
+          </Button>
         </>
       )}
     </div>
   )
-}
-
-const styles = {
-  container: {
-    position: "fixed" as const,
-    bottom: 20,
-    left: "50%",
-    transform: "translateX(-50%)",
-    background: "#052b33",
-    color: "#fff",
-    padding: "14px 16px",
-    borderRadius: "12px",
-    zIndex: 9999,
-    boxShadow: "0 4px 12px rgba(0,0,0,0.35)",
-    textAlign: "center" as const,
-    maxWidth: 280,
-  },
-  button: {
-    marginTop: 10,
-    background: "#00adb5",
-    color: "#fff",
-    border: "none",
-    padding: "8px 14px",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontWeight: 600,
-  },
 }
