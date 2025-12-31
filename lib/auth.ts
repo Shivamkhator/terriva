@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
         const transporter = nodemailer.createTransport(provider.server);
 
         const appName = "Terriva";
-        const from = `Terriva by SkyBee <${process.env.EMAIL_FROM}>`;
+        const from = `${provider.from}`;
 
         const emailHtml = `
          <!DOCTYPE html>

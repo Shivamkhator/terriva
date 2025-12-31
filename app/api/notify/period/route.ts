@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
   await sendMail({
     to: email,
-    subject: "🌸 Period Reminder",
+    subject: "🌸 Period Reminder from Terriva",
     html: periodReminderEmail({ name, daysLeft }),
   });
 
