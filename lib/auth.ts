@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
         const transporter = nodemailer.createTransport(provider.server);
 
         const appName = "Terriva";
-        const from = provider.from || `Terriva <${process.env.EMAIL_FROM}>`;
+        const from = `Terriva by SkyBee <${process.env.EMAIL_FROM}>`;
 
         const emailHtml = `
          <!DOCTYPE html>
@@ -47,7 +47,7 @@ export const authOptions: NextAuthOptions = {
     <title>${appName} Login</title>
     <style>
       body { margin:0; padding:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background:#f4f6f8; color:#1a202c; }
-      .container { max-width:680px; margin:0 auto; padding:24px; }
+      .container { max-width:680px; margin:0 auto; padding:24px; text-align:center}
       .card { background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 6px 24px rgba(11,22,39,0.06); }
       .header { background:#052b33; padding:28px 24px; text-align:center; color:#fff; }
       .brand { display:inline-flex; align-items:center; gap:12px; }
@@ -83,7 +83,7 @@ export const authOptions: NextAuthOptions = {
         </div>
 
         <div class="content">
-          <p class="greeting">Dear User,</p>
+          <p class="greeting">Hi there,</p>
 
           <p class="message">
             Click the button below to easily login to <strong>${appName}</strong>.

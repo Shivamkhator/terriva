@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
 
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "skybee.vercel.app" },
       { protocol: "https", hostname: "*.googleusercontent.com" },
       { protocol: "https", hostname: "images.pexels.com" },
     ],

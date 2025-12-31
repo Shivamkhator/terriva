@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from "@/components/ui/slider";
-import { ChevronDown, ChevronRightIcon, Trash2, Save, Calendar as CalendarIcon, TrendingUp, Activity} from "lucide-react";
+import { ChevronDown, ChevronRightIcon, Trash2, Save, Calendar as CalendarIcon, TrendingUp, Activity } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
     Popover,
@@ -65,9 +65,10 @@ const FLOW_STATES = [
 export default function DashboardClient({ user }: DashboardClientProps) {
     const [insights, setInsights] = React.useState<any | null>(null);
     const [loadingInsights, setLoadingInsights] = React.useState(true);
-    const [openFlowDate, setOpenFlowDate] = React.useState(false);
+    const [emailEnabled, setEmailEnabled] = React.useState(false);
+    const [savingEmailPref, setSavingEmailPref] = React.useState(false);
     const [flowDate, setFlowDate] = React.useState<Date | undefined>(undefined);
-    const [flow, setFlow] = useState(1);
+    const [flow, setFlow] = useState(0);
 
     const router = useRouter();
 
@@ -131,6 +132,17 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     const sortedPeriods = React.useMemo(() => {
         return [...periods].sort((a, b) => b.startDate.getTime() - a.startDate.getTime());
     }, [periods]);
+
+    useEffect(() => {
+        if (!user?.email) return;
+
+        fetch("/api/user/me")
+            .then(res => res.json())
+            .then(data => {
+                setEmailEnabled(data.emailNotifications);
+            });
+    }, [user]);
+
 
     useEffect(() => {
         let isMounted = true;
@@ -285,12 +297,13 @@ export default function DashboardClient({ user }: DashboardClientProps) {
         }
     };
 
+
     return (
         <div className="min-h-screen">
-            <div className="flex w-full max-w-5xl mx-auto flex-col gap-6 p-4 md:p-8">
+            <div className="flex w-full max-w-5xl mx-auto flex-col gap-2 p-4 md:p-8">
 
                 {/* Header */}
-                <div className="relative mb-4 overflow-hidden rounded-2xl bg-primary p-8 text-white">
+                <div className="relative overflow-hidden rounded-2xl bg-primary p-8 text-white">
 
                     <div className="pointer-events-none absolute -top-1/2 -right-[10%] h-[200px] w-[300px] rounded-full bg-white/10"></div>
                     <div className="pointer-events-none absolute -bottom-[30%] -left-[5%] h-[200px] w-[200px] rounded-full bg-white/10"></div>
@@ -322,6 +335,54 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                         </div>
                     </div>
                 </div>
+
+                <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-semibold text-primary">
+                            Email reminders
+                        </p>
+                        <p className="text-xs text-gray-primary">
+                            Get notified before your period starts
+                        </p>
+                    </div>
+                    <button
+                        onClick={async () => {
+                            const next = !emailEnabled;
+                            setEmailEnabled(next);
+                            setSavingEmailPref(true);
+
+                            try {
+                                const res = await fetch("/api/user/email-preference", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ enabled: next }),
+                                });
+
+                                if (!res.ok) {
+                                    // rollback on failure
+                                    setEmailEnabled(!next);
+                                }
+                            } catch {
+                                setEmailEnabled(!next);
+                            } finally {
+                                setSavingEmailPref(false);
+                            }
+                        }}
+                        disabled={savingEmailPref}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition
+    ${emailEnabled ? "bg-primary" : "bg-gray-primary opacity-30"}
+    ${savingEmailPref ? "cursor-not-allowed" : ""}
+  `}
+                    >
+                        <span
+                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition
+      ${emailEnabled ? "translate-x-6" : "translate-x-1"}
+    `}
+                        />
+                    </button>
+
+                </div>
+
 
                 {/* Main Tabs */}
                 <Tabs defaultValue="flow" className="w-full">

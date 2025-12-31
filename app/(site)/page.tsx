@@ -232,7 +232,7 @@ function FooterSection() {
             <PreviewCard>
                 <PreviewCardTrigger
                     render={
-                        <Link className="text-white leading-none uppercase mb-8 text-[8vw] font-bold text-shadow-lg" href="https://skybee.vercel.app">Terriva
+                        <Link className="text-white leading-none uppercase mb-8 text-[8vw] font-bold text-shadow-lg" href="https://shivamkhator.framer.website">Terriva
                         </Link>
                     }
                 />
@@ -245,13 +245,13 @@ function FooterSection() {
                             className="w-12 h-12 rounded-full overflow-hidden border"
                             width={48}
                             height={48}
-                            src="https://skybee.vercel.app/SkyBee.svg"
+                            src="/SkyBee.svg"
                             alt="SkyBee"
                         />
                         <div className="flex flex-col gap-2">
                             <div>
                                 <div className="font-bold">Terriva</div>
-                                <div className="text-xs text-muted-foreground">SkyBee's Creation</div>
+                                <div className="text-xs text-muted-foreground">A SkyBee's Creation</div>
                             </div>
                             <div className="text-sm text-gray-700">
                                 Building useful tools for a better digital life.

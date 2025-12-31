@@ -40,6 +40,41 @@ export default function InsightsClient({ user }: CycleClientProps) {
     const [insights, setInsights] = useState<any>(null);
     const [loadingInsights, setLoadingInsights] = useState<boolean>(true);
 
+    const phaseSuggestions = {
+        menstrual: [
+            "Low energy days — rest and hydration can help 🌸",
+            "It’s okay to slow down today. Be kind to your body 💗",
+            "Gentle movement and warmth may feel comforting today.",
+            "You may feel more tired today — listening to your body helps.",
+            "Rest, fluids, and light meals can support you today."
+        ],
+
+        follicular: [
+            "Your energy may be rising — a good time to start new things ✨",
+            "You might feel clearer and more motivated today.",
+            "This phase often brings fresh energy and focus.",
+            "A great time to plan, learn, or try something new 🌱",
+            "You may feel lighter and more optimistic today."
+        ],
+
+        ovulation: [
+            "You may feel more confident and social today 🌼",
+            "Your body is at a natural peak of energy right now.",
+            "Good day for communication and connection 💬",
+            "You might feel stronger and more expressive today.",
+            "Energy and mood often feel balanced in this phase."
+        ],
+
+        luteal: [
+            "Slowing down a bit may feel good today 💛",
+            "Self-care and rest can be especially helpful now.",
+            "You might feel more sensitive — that’s completely normal.",
+            "Focus on comfort and simple routines today.",
+            "Listening to your needs is important in this phase."
+        ]
+    };
+
+
     useEffect(() => {
         const loadData = async () => {
             try {
@@ -187,8 +222,8 @@ export default function InsightsClient({ user }: CycleClientProps) {
                 (a, b) =>
                     new Date(b.startDate).getTime() -
                     new Date(a.startDate).getTime()
-            )[0]: null ;
-        }
+            )[0] : null;
+    }
 
 
     function calculateNextPeriodDays() {
@@ -197,10 +232,188 @@ export default function InsightsClient({ user }: CycleClientProps) {
         const nextPeriod = new Date(insights.nextPeriodDate);
         return daysBetween(today, nextPeriod);
     }
+    function todayKey() {
+        return new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    }
+
+
+    function getDailySuggestionCached(
+        phase: keyof typeof phaseSuggestions
+    ) {
+        const key = `daily-suggestion-${todayKey()}-${phase}`;
+
+        const cached = localStorage.getItem(key);
+        if (cached) return cached;
+
+        const suggestions = phaseSuggestions[phase];
+        const selected =
+            suggestions[Math.floor(Math.random() * suggestions.length)];
+
+        localStorage.setItem(key, selected);
+        return selected;
+    }
+    function getCyclePhase(
+        day: number,
+        periodLength: number,
+        cycleLength: number
+    ) {
+        if (day <= periodLength) return "menstrual";
+
+        const ovulationDay = cycleLength - 14;
+
+        if (day < ovulationDay - 4) return "follicular";
+        if (day >= ovulationDay - 4 && day <= ovulationDay + 1) return "ovulation";
+        return "luteal";
+    }
+
+    const currentPhase = useMemo(() => {
+        if (!insights) return "follicular";
+
+        return getCyclePhase(
+            currentDay,
+            insights.avgPeriodLength ?? 5,
+            insights.avgCycleLength ?? 28
+        );
+    }, [currentDay, insights]);
+
+    const dailySuggestion = useMemo(() => {
+        if (typeof window === "undefined") return "";
+        return getDailySuggestionCached(currentPhase);
+    }, [currentPhase]);
+
+    function getCycleLengths(
+        periods: Array<{ startDate: Date }>
+    ): number[] {
+        if (periods.length < 2) return [];
+
+        const sorted = [...periods].sort(
+            (a, b) => a.startDate.getTime() - b.startDate.getTime()
+        );
+
+        const lengths: number[] = [];
+
+        for (let i = 1; i < sorted.length; i++) {
+            const prev = sorted[i - 1].startDate;
+            const curr = sorted[i].startDate;
+
+            lengths.push(
+                Math.round(
+                    (curr.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24)
+                )
+            );
+        }
+
+        return lengths;
+    }
+
+    function standardDeviation(values: number[]) {
+        if (values.length === 0) return 0;
+
+        const mean =
+            values.reduce((a, b) => a + b, 0) / values.length;
+
+        const variance =
+            values.reduce((a, b) => a + (b - mean) ** 2, 0) /
+            values.length;
+
+        return Math.sqrt(variance);
+    }
+
+    function cycleRegularityScore(cycleLengths: number[]) {
+        if (cycleLengths.length < 3) {
+            return {
+                score: null,
+                label: "Not enough data",
+            };
+        }
+
+        const sd = standardDeviation(cycleLengths);
+
+        // Map SD → score
+        const score = Math.max(0, Math.min(100, 100 - sd * 10));
+
+        let label = "Irregular";
+        if (sd <= 2) label = "Very Regular";
+        else if (sd <= 4) label = "Regular";
+        else if (sd <= 7) label = "Somewhat Irregular";
+
+        return {
+            score: Math.round(score),
+            label,
+            sd: Math.round(sd * 10) / 10,
+        };
+    }
+
+    const cycleRegularity = useMemo(() => {
+        const lengths = getCycleLengths(periods);
+        return cycleRegularityScore(lengths);
+    }, [periods]);
+
+    function getHealthWarnings({
+        avgPeriodLength,
+        avgCycleLength,
+        dailyFlows,
+    }: {
+        avgPeriodLength?: number;
+        avgCycleLength?: number;
+        dailyFlows: Array<{ date: string; intensity: number }>;
+    }) {
+        const warnings: string[] = [];
+
+        // Period length
+        if (avgPeriodLength && avgPeriodLength > 8) {
+            warnings.push(
+                "Your periods seem longer than usual. Tracking this over time can help spot patterns."
+            );
+        }
+
+        if (avgPeriodLength && avgPeriodLength < 3) {
+            warnings.push(
+                "Your periods seem shorter than average. Consider consulting a healthcare professional."
+            );
+        }
+
+        // Cycle length
+        if (avgCycleLength) {
+            if (avgCycleLength < 21) {
+                warnings.push(
+                    "Your cycle appears shorter than average. This can sometimes happen due to stress or hormonal changes."
+                );
+            }
+            if (avgCycleLength > 35) {
+                warnings.push(
+                    "Your cycle appears longer than average. Keeping track may help understand your rhythm."
+                );
+            }
+        }
+
+        // Flow heaviness
+        const heavyDays = dailyFlows.filter(f => f.intensity === 3);
+
+        if (heavyDays.length >= 3) {
+            warnings.push(
+                "You’ve logged several heavy flow days. Make sure to rest and stay hydrated."
+            );
+        }
+
+        return warnings;
+    }
+
+    const healthWarnings = useMemo(() => {
+        if (!insights) return [];
+
+        return getHealthWarnings({
+            avgPeriodLength: insights.avgPeriodLength,
+            avgCycleLength: insights.avgCycleLength,
+            dailyFlows,
+        });
+    }, [insights, dailyFlows]);
+
+
 
     return (
         <div className="min-h-screen">
-            <div className="flex w-full max-w-5xl mx-auto flex-col gap-6 p-4 md:p-8">
+            <div className="flex w-full max-w-5xl mx-auto flex-col gap-2 p-4 md:p-8">
 
                 {/* Header */}
                 <div className="relative mb-4 overflow-hidden rounded-2xl bg-primary p-8 text-white">
@@ -234,7 +447,7 @@ export default function InsightsClient({ user }: CycleClientProps) {
                     </div>
                 </div>
 
-                <div className=" flex flex-col gap-8 grid-cols-1 md:grid md:grid-cols-12">
+                <div className=" flex flex-col gap-4 grid-cols-1 lg:grid lg:grid-cols-12">
 
 
                     <div className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-5 lg:row-span-2">
@@ -246,32 +459,81 @@ export default function InsightsClient({ user }: CycleClientProps) {
                             cycleLength={totalDays}
                         />
 
+                        {healthWarnings.length > 0 ? (
+                            <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                                <p className="text-sm uppercase tracking-wide text-amber-600 mb-1 font-semibold">
+                                    Health Notice
+                                </p>
+
+                                <ul className="list-disc list-inside text-[12px] text-amber-700 space-y-1">
+                                    {healthWarnings.map((warning, idx) => (
+                                        <li key={idx}>{warning}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ) : (
+                            <div className="mb-3 rounded-xl border border-pink-200 bg-pink-50 px-4 py-3 transition-all">
+                                <p className="text-sm uppercase tracking-wide text-pink-500 mb-1 font-semibold">
+                                    Did you know?
+                                </p>
+
+                                <p className="text-[12px] text-pink-700 leading-relaxed">
+                                    {dailySuggestion}
+                                </p>
+                            </div>)}
+
+
                         {/* Bottom Section: Data-Driven Insights */}
 
-                            <div className="relative p-4 bg-linear-to-r from-pink-50 to-purple-50 rounded-xl border-2 border-pink-100 hover:shadow-md transition-all group ">
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-sm font-bold text-pink-700">Pro Metrics</span>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
+                        <div className="relative p-4 bg-linear-to-r from-pink-50 to-purple-50 rounded-xl border-2 border-pink-100 hover:shadow-md transition-all group ">
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-bold text-pink-700">Pro Metrics</span>
+                            </div>
+                            <div className="grid grid-cols-2 mb-4">
 
-                                    <div className=" p-3 rounded-xl">
-                                        <p className="text-xs uppercase text-gray-400 font-bold">Last Period on</p>
-                                        <p className="font-semibold text-xl text-gray-700">{formatDate(lastPeriod()?.startDate) || "--"}</p>
-                                    </div>
-                                    <div className=" p-3 rounded-xl">
-                                        <p className="text-xs uppercase text-gray-400 font-bold">Next Periods in</p>
-                                        <p className="font-semibold text-xl text-gray-700">{calculateNextPeriodDays() || "--"} Days</p>
-                                    </div>
-                                    <div className=" p-3 rounded-xl">
-                                        <p className="text-xs uppercase text-gray-400 font-bold">Avg. Period Length</p>
-                                        <p className="font-semibold text-xl text-gray-700">{insights?.avgPeriodLength || "--"} Days</p>
-                                    </div>
-                                    <div className=" p-3 rounded-xl">
-                                        <p className="text-xs uppercase text-gray-400 font-bold">Avg. Cycle Length</p>
-                                        <p className="font-semibold text-xl text-gray-700">{totalDays || "--"} Days</p>
-                                    </div>
-
+                                <div className=" p-3 rounded-xl">
+                                    <p className="text-xs uppercase text-gray-400 font-bold">Last Period on</p>
+                                    <p className="font-semibold text-xl text-gray-700">{formatDate(lastPeriod()?.startDate) || "--"}</p>
                                 </div>
+                                <div className=" p-3 rounded-xl">
+                                    <p className="text-xs uppercase text-gray-400 font-bold">Next Periods in</p>
+                                    <p className="font-semibold text-xl text-gray-700">{calculateNextPeriodDays() || "--"} Days</p>
+                                </div>
+                                <div className=" p-3 rounded-xl">
+                                    <p className="text-xs uppercase text-gray-400 font-bold">Avg. Period Length</p>
+                                    <p className="font-semibold text-xl text-gray-700">{insights?.avgPeriodLength || "--"} Days</p>
+                                </div>
+                                <div className=" p-3 rounded-xl">
+                                    <p className="text-xs uppercase text-gray-400 font-bold">Avg. Cycle Length</p>
+                                    <p className="font-semibold text-xl text-gray-700">{totalDays || "--"} Days</p>
+                                </div>
+
+                            </div>
+
+                            <div className="p-3 rounded-xl bg-pink-50 border border-pink-200">
+                                <p className="text-sm uppercase text-gray-primary font-semibold">
+                                    Cycle Regularity
+                                </p>
+
+                                {cycleRegularity.score === null ? (
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        Track more cycles to calculate
+                                    </p>
+                                ) : (
+                                    <p className="font-semibold text-lg text-pink-600 mt-1">
+                                        {cycleRegularity.score}% · {cycleRegularity.label}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="p-3 rounded-xl bg-pink-50 border border-pink-200 mt-2">
+                                <p className="text-sm uppercase text-red-600 font-semibold">
+                                    Disclaimer
+                                </p>
+                                <p className="text-sm font-semibold text-pink-700 mt-2 ">
+                                    These insights are informational only, not medical advice.
+                                </p>
+                            </div>
+
                         </div>
                     </div>
                     <div className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-7 lg:row-span-1">
@@ -287,6 +549,6 @@ export default function InsightsClient({ user }: CycleClientProps) {
                 </div>
 
             </div>
-        </div>
+        </div >
     );
 }

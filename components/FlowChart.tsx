@@ -135,7 +135,7 @@ const options: ChartOptions<'bar'> = {
 
 
   return (
-      <div className="relative h-[36vh] md:h-[24vh]">
+      <div className="relative h-[40vh]">
         <Bar data={chartData} options={options} />
       </div>
   );

@@ -135,7 +135,7 @@ export default function LineChart({ data }: Props) {
     : 0;
 
   return (
-      <div className="relative h-[36vh] md:h-[24vh]">
+      <div className="relative h-[40vh] ">
         <Line data={chartData} options={options} />
     </div>
   );
