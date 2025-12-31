@@ -94,5 +94,7 @@ model CycleInsight {
   nextPeriodDate  DateTime?
   totalPeriods    Int
 
+  lastPeriodReminderSent DateTime?
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
