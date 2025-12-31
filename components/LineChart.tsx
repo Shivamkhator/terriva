@@ -39,6 +39,43 @@ export default function LineChart({ data }: Props) {
     });
   });
 
+  if (data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[40vh]">
+        <svg
+          className="w-12 h-12 text-gray-400 mb-3"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          {/* Axes */}
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M4 19V5M4 19H20"
+          />
+
+          {/* Line chart */}
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M6 15l4-4 4 3 4-6"
+          />
+
+          {/* Data points */}
+          <circle cx="6" cy="15" r="0.75" fill="currentColor" />
+          <circle cx="10" cy="11" r="0.75" fill="currentColor" />
+          <circle cx="14" cy="14" r="0.75" fill="currentColor" />
+          <circle cx="18" cy="8" r="0.75" fill="currentColor" />
+        </svg>
+
+        <p className="text-gray-500">No period data available.</p>
+      </div>
+    );
+  }
+
   const values = data.map(d => d.cycleDays);
 
   const chartData = {
@@ -130,13 +167,13 @@ export default function LineChart({ data }: Props) {
   };
 
   // Calculate average for insight
-  const avgDuration = values.length > 0 
+  const avgDuration = values.length > 0
     ? (values.reduce((sum, val) => sum + val, 0) / values.length).toFixed(1)
     : 0;
 
   return (
-      <div className="relative h-[40vh] ">
-        <Line data={chartData} options={options} />
+    <div className="relative h-[40vh] ">
+      <Line data={chartData} options={options} />
     </div>
   );
 }

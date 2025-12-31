@@ -68,7 +68,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     const [emailEnabled, setEmailEnabled] = React.useState(false);
     const [savingEmailPref, setSavingEmailPref] = React.useState(false);
     const [flowDate, setFlowDate] = React.useState<Date | undefined>(undefined);
-    const [flow, setFlow] = useState(0);
+    const [flow, setFlow] = useState(1);
 
     const router = useRouter();
 

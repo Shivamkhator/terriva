@@ -210,7 +210,7 @@ export default function InsightsClient({ user }: CycleClientProps) {
 
         return {
             currentDay: day,
-            totalDays: insights?.avgCycleLength ?? 28,
+            totalDays: insights?.avgCycleLength,
         };
     }, [periods, insights]);
 
@@ -409,10 +409,8 @@ export default function InsightsClient({ user }: CycleClientProps) {
         });
     }, [insights, dailyFlows]);
 
-
-
-    return (
-        <div className="min-h-screen">
+    if (!insights) {
+        return (
             <div className="flex w-full max-w-5xl mx-auto flex-col gap-2 p-4 md:p-8">
 
                 {/* Header */}
@@ -430,7 +428,7 @@ export default function InsightsClient({ user }: CycleClientProps) {
                                     </span>
                                 </div>
                                 <p className="opacity-70 text-sm flex items-center gap-1">
-                                    Track more cycles to make insights more accurate
+                                    Add more cycle data to unlock personalized insights
                                 </p>
                             </div>
 
@@ -446,109 +444,167 @@ export default function InsightsClient({ user }: CycleClientProps) {
                         </div>
                     </div>
                 </div>
-
-                <div className=" flex flex-col gap-4 grid-cols-1 lg:grid lg:grid-cols-12">
-
-
-                    <div className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-5 lg:row-span-2">
-                        <h3 className="font-semibold text-gray-500">Cycle Overview</h3>
-
-                        <AnimatedCircularProgressBar
-                            currentDay={currentDay}
-                            periodLength={insights?.avgPeriodLength || 5}
-                            cycleLength={totalDays}
-                        />
-
-                        {healthWarnings.length > 0 ? (
-                            <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-                                <p className="text-sm uppercase tracking-wide text-amber-600 mb-1 font-semibold">
-                                    Health Notice
-                                </p>
-
-                                <ul className="list-disc list-inside text-[12px] text-amber-700 space-y-1">
-                                    {healthWarnings.map((warning, idx) => (
-                                        <li key={idx}>{warning}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ) : (
-                            <div className="mb-3 rounded-xl border border-pink-200 bg-pink-50 px-4 py-3 transition-all">
-                                <p className="text-sm uppercase tracking-wide text-pink-500 mb-1 font-semibold">
-                                    Did you know?
-                                </p>
-
-                                <p className="text-[12px] text-pink-700 leading-relaxed">
-                                    {dailySuggestion}
-                                </p>
-                            </div>)}
-
-
-                        {/* Bottom Section: Data-Driven Insights */}
-
-                        <div className="relative p-4 bg-linear-to-r from-pink-50 to-purple-50 rounded-xl border-2 border-pink-100 hover:shadow-md transition-all group ">
-                            <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm font-bold text-pink-700">Pro Metrics</span>
-                            </div>
-                            <div className="grid grid-cols-2 mb-4">
-
-                                <div className=" p-3 rounded-xl">
-                                    <p className="text-xs uppercase text-gray-400 font-bold">Last Period on</p>
-                                    <p className="font-semibold text-xl text-gray-700">{formatDate(lastPeriod()?.startDate) || "--"}</p>
-                                </div>
-                                <div className=" p-3 rounded-xl">
-                                    <p className="text-xs uppercase text-gray-400 font-bold">Next Periods in</p>
-                                    <p className="font-semibold text-xl text-gray-700">{calculateNextPeriodDays() || "--"} Days</p>
-                                </div>
-                                <div className=" p-3 rounded-xl">
-                                    <p className="text-xs uppercase text-gray-400 font-bold">Avg. Period Length</p>
-                                    <p className="font-semibold text-xl text-gray-700">{insights?.avgPeriodLength || "--"} Days</p>
-                                </div>
-                                <div className=" p-3 rounded-xl">
-                                    <p className="text-xs uppercase text-gray-400 font-bold">Avg. Cycle Length</p>
-                                    <p className="font-semibold text-xl text-gray-700">{totalDays || "--"} Days</p>
-                                </div>
-
-                            </div>
-
-                            <div className="p-3 rounded-xl bg-pink-50 border border-pink-200">
-                                <p className="text-sm uppercase text-gray-primary font-semibold">
-                                    Cycle Regularity
-                                </p>
-
-                                {cycleRegularity.score === null ? (
-                                    <p className="text-sm text-gray-500 mt-1">
-                                        Track more cycles to calculate
-                                    </p>
-                                ) : (
-                                    <p className="font-semibold text-lg text-pink-600 mt-1">
-                                        {cycleRegularity.score}% · {cycleRegularity.label}
-                                    </p>
-                                )}
-                            </div>
-                            <div className="p-3 rounded-xl bg-pink-50 border border-pink-200 mt-2">
-                                <p className="text-sm uppercase text-red-600 font-semibold">
-                                    Disclaimer
-                                </p>
-                                <p className="text-sm font-semibold text-pink-700 mt-2 ">
-                                    These insights are informational only, not medical advice.
-                                </p>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-7 lg:row-span-1">
-                        <h3 className="font-semibold text-gray-500 mb-4">Average Periods Length </h3>
-
-                        <LineChart data={monthlyPeriodData} />
-                    </div>
-                    <div className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-7 lg:row-span-1">
-                        <h3 className="font-semibold text-gray-500 mb-4">Flow Intensity</h3>
-
-                        <FlowChart data={monthlyFlowData} />
-                    </div>
+                <div className=" flex flex-col bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-5 lg:row-span-2">
+                    <div className="flex flex-col items-center justify-center h-[60vh]">
+        <svg
+          className="w-16 h-16 text-gray-400 mb-3"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
+        </svg>
+        <p className="text-gray-500 text-lg">No insights available.</p>
+        <p className='text-gray-400 text-sm text-center'>Add more cycle data in dashboard to unlock personalized insights.</p>
+      </div>
                 </div>
+            </div >
+                )
+    }
 
-            </div>
-        </div >
-    );
+                return (
+                <div className="min-h-screen">
+                    <div className="flex w-full max-w-5xl mx-auto flex-col gap-2 p-4 md:p-8">
+
+                        {/* Header */}
+                        <div className="relative mb-4 overflow-hidden rounded-2xl bg-primary p-8 text-white">
+
+                            <div className="pointer-events-none absolute -top-1/2 -right-[10%] h-[200px] w-[300px] rounded-full bg-white/10"></div>
+                            <div className="pointer-events-none absolute -bottom-[30%] -left-[5%] h-[200px] w-[200px] rounded-full bg-white/10"></div>
+
+                            <div className="relative z-10">
+                                <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                                    <div>
+                                        <div className="mb-2 text-2xl md:text-3xl font-semibold">
+                                            <span className="items-center gap-2">
+                                                Knowing Yourself
+                                            </span>
+                                        </div>
+                                        <p className="opacity-70 text-sm flex items-center gap-1">
+                                            Track more cycles to make insights more accurate
+                                        </p>
+                                    </div>
+
+                                    <div className="text-left md:text-right">
+
+                                        <Button onClick={() => router.push("/dashboard")} className="bg-white/20 hover:bg-white/30 text-white font-medium h-10 flex items-center gap-2">
+                                            Dashboard
+                                            <ChevronRightIcon className="h-4 w-4" />
+                                        </Button>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className=" flex flex-col gap-4 grid-cols-1 lg:grid lg:grid-cols-12">
+
+
+                            <div className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-5 lg:row-span-2">
+                                <h3 className="font-semibold text-gray-500">Cycle Overview</h3>
+
+                                <AnimatedCircularProgressBar
+                                    currentDay={currentDay}
+                                    periodLength={insights?.avgPeriodLength || 5}
+                                    cycleLength={totalDays}
+                                />
+
+                                {healthWarnings.length > 0 ? (
+                                    <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                                        <p className="text-sm uppercase tracking-wide text-amber-600 mb-1 font-semibold">
+                                            Health Notice
+                                        </p>
+
+                                        <ul className="list-disc list-inside text-[12px] text-amber-700 space-y-1">
+                                            {healthWarnings.map((warning, idx) => (
+                                                <li key={idx}>{warning}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ) : (
+                                    <div className="mb-3 rounded-xl border border-pink-200 bg-pink-50 px-4 py-3 transition-all">
+                                        <p className="text-sm uppercase tracking-wide text-pink-500 mb-1 font-semibold">
+                                            Did you know?
+                                        </p>
+
+                                        <p className="text-[12px] text-pink-700 leading-relaxed">
+                                            {dailySuggestion}
+                                        </p>
+                                    </div>)}
+
+
+                                {/* Bottom Section: Data-Driven Insights */}
+
+                                <div className="relative p-4 bg-linear-to-r from-pink-50 to-purple-50 rounded-xl border-2 border-pink-100 hover:shadow-md transition-all group ">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-sm font-bold text-pink-700">Pro Metrics</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 mb-4">
+
+                                        <div className=" p-3 rounded-xl">
+                                            <p className="text-xs uppercase text-gray-400 font-bold">Last Period on</p>
+                                            <p className="font-semibold text-xl text-gray-700">{formatDate(lastPeriod()?.startDate) || "--"}</p>
+                                        </div>
+                                        <div className=" p-3 rounded-xl">
+                                            <p className="text-xs uppercase text-gray-400 font-bold">Next Periods in</p>
+                                            <p className="font-semibold text-xl text-gray-700">{calculateNextPeriodDays() || "--"} Days</p>
+                                        </div>
+                                        <div className=" p-3 rounded-xl">
+                                            <p className="text-xs uppercase text-gray-400 font-bold">Avg. Period Length</p>
+                                            <p className="font-semibold text-xl text-gray-700">{insights?.avgPeriodLength || "--"} Days</p>
+                                        </div>
+                                        <div className=" p-3 rounded-xl">
+                                            <p className="text-xs uppercase text-gray-400 font-bold">Avg. Cycle Length</p>
+                                            <p className="font-semibold text-xl text-gray-700">{totalDays || "--"} Days</p>
+                                        </div>
+
+                                    </div>
+
+                                    <div className="p-3 rounded-xl bg-pink-50 border border-pink-200">
+                                        <p className="text-sm uppercase text-gray-primary font-semibold">
+                                            Cycle Regularity
+                                        </p>
+
+                                        {cycleRegularity.score === null ? (
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                Track more cycles to calculate
+                                            </p>
+                                        ) : (
+                                            <p className="font-semibold text-lg text-pink-600 mt-1">
+                                                {cycleRegularity.score}% · {cycleRegularity.label}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="p-3 rounded-xl bg-pink-50 border border-pink-200 mt-2">
+                                        <p className="text-sm uppercase text-red-600 font-semibold">
+                                            Disclaimer
+                                        </p>
+                                        <p className="text-sm font-semibold text-pink-700 mt-2 ">
+                                            These insights are informational only, not medical advice.
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-7 lg:row-span-1">
+                                <h3 className="font-semibold text-gray-500 mb-4">Average Periods Length </h3>
+
+                                <LineChart data={monthlyPeriodData} />
+                            </div>
+                            <div className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-7 lg:row-span-1">
+                                <h3 className="font-semibold text-gray-500 mb-4">Flow Intensity</h3>
+
+                                <FlowChart data={monthlyFlowData} />
+                            </div>
+                        </div>
+
+                    </div>
+                </div >
+                );
 }
