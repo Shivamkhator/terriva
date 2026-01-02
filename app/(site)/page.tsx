@@ -79,11 +79,11 @@ function HeroSection() {
 
             </nav>
 
-            <div className="mt-auto mb-[6vh] md:mb-[4vh] mr-2 md:mr-6">
-                <h1 className="text-[22vw] md:text-[15vw] leading-[0.85] font-bold text-primary tracking-tighter uppercase mix-blend-darken pb-[8vh] md:pb-0">
+            <div className="mt-auto mb-[6svh] md:mb-[4svh] mr-2 md:mr-6">
+                <h1 className="text-[22vw] md:text-[15vw] leading-[0.85] font-bold text-primary tracking-tighter uppercase mix-blend-darken pb-[8svh] md:pb-0">
                     Clarity <span className="block italic font-serif font-light text-accent-foreground ml-[9vw]">Every</span> Month
                 </h1>
-                <div className="flex flex-col md:flex-row justify-between items-end border-t border-primary/30 py-[4vh] ">
+                <div className="flex flex-col md:flex-row justify-between items-end border-t border-primary/30 py-[4svh] ">
                     <p className="max-w-md text-xl text-gray-primary leading-relaxed">
                         Your Insights, Only Yours. <br />
                         <span className="opacity-85 text-sm">Scroll to sync.</span>
@@ -96,7 +96,7 @@ function HeroSection() {
 
             <motion.div
                 style={{ y }}
-                className=" absolute -z-1 top-[8vh] md:right-8 pointer-events-none"
+                className=" absolute -z-1 top-[8svh] md:right-8 pointer-events-none"
             >
                 <Image
                     src="/Terriva.png"
@@ -122,7 +122,7 @@ function ScrollCarouselSection() {
     const totalSlides = features.length
 
     return (
-        <section ref={targetRef} className="relative h-[400vh] z-20">
+        <section ref={targetRef} className="relative h-[400svh] z-20">
             <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-center">
 
                 <SidebarUI scrollYProgress={scrollYProgress} totalSlides={totalSlides} />
@@ -228,7 +228,7 @@ function CarouselSlide({ feature, index, totalSlides, scrollYProgress }: any) {
 function FooterSection() {
     const { data: session } = useSession();
     return (
-        <section className="h-[60vh] bg-primary flex flex-col items-center justify-center text-center p-12">
+        <section className="h-[60svh] bg-primary flex flex-col items-center justify-center text-center p-12">
             <PreviewCard>
                 <PreviewCardTrigger
                     render={

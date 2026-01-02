@@ -445,7 +445,7 @@ export default function InsightsClient({ user }: CycleClientProps) {
                     </div>
                 </div>
                 <div className=" flex flex-col bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-5 lg:row-span-2">
-                    <div className="flex flex-col items-center justify-center h-[60vh]">
+                    <div className="flex flex-col items-center justify-center h-[60svh]">
         <svg
           className="w-16 h-16 text-gray-400 mb-3"
           fill="none"

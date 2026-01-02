@@ -41,7 +41,7 @@ export default function LineChart({ data }: Props) {
 
   if (data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-[40vh]">
+      <div className="flex flex-col items-center justify-center h-[40svh]">
         <svg
           className="w-12 h-12 text-gray-400 mb-3"
           fill="none"
@@ -172,7 +172,7 @@ export default function LineChart({ data }: Props) {
     : 0;
 
   return (
-    <div className="relative h-[40vh] ">
+    <div className="relative h-[40svh] ">
       <Line data={chartData} options={options} />
     </div>
   );
