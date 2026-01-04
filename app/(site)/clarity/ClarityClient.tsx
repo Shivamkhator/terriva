@@ -90,7 +90,7 @@ export default function ClarityPage({ user }: ClarityClientProps) {
                                     </span>
                                 </div>
                                 <p className="opacity-70 text-sm flex items-center gap-1">
-                                    Add more cycle data to unlock the ability to chat with your assistant
+                                    Add more data to unlock the ability to chat with your assistant
                                 </p>
                             </div>
 
@@ -110,13 +110,13 @@ export default function ClarityPage({ user }: ClarityClientProps) {
                     <div className="flex flex-col items-center justify-center h-[40svh]">
                         <Brain className="h-12 w-12 text-pink-500 mb-4" />
                         <p className="text-gray-500 text-lg">No personal data available.</p>
-                        <p className='text-gray-400 text-sm text-center'>Add more cycle data in dashboard to chat with your assistant.</p>
+                        <p className='text-gray-400 text-sm text-center'>Add more data in dashboard to chat with Terriva.</p>
                     </div>
                 </div>
             </div >
         )
     }
-    
+
     return (
         <div className="mx-auto min-h-screen max-w-5xl px-4 py-6 md:py-10 space-y-6 mb-20">
 
@@ -157,7 +157,7 @@ export default function ClarityPage({ user }: ClarityClientProps) {
                     {/* Input */}
                     <div className="flex flex-col sm:flex-row gap-3">
                         <Input
-                            placeholder="Ask anything about your cycle..."
+                            placeholder="Ask anything to Terriva..."
                             value={question}
                             onChange={(e) => setQuestion(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleAsk()}

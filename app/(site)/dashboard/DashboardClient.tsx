@@ -405,7 +405,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                 <p className="text-sm pt-2 text-muted-foreground">
                                                     Logging flow for
                                                 </p>
-                                                <p className=" text-muted-foreground mt-1">
+                                                <p className=" text-muted-foreground mt-1 italic font-semibold">
                                                     {formatDate(today)}
                                                 </p>
                                             </div>

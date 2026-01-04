@@ -13,7 +13,7 @@ const features = [
         id: 1,
         title: "Get Clarity",
         subtitle: "CLARITY",
-        description: "Your AI assistant to answer all your period-related questions.",
+        description: "Get answers to all your period-related questions with Terriva.",
         color: "bg-pink-500", // Pink
         icon: Brain,
     },

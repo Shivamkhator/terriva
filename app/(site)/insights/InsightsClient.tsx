@@ -483,7 +483,7 @@ export default function InsightsClient({ user }: CycleClientProps) {
                             />
                         </svg>
                         <p className="text-gray-500 text-lg">No insights available.</p>
-                        <p className='text-gray-400 text-sm text-center'>Add more cycle data in dashboard to unlock personalized insights.</p>
+                        <p className='text-gray-400 text-sm text-center'>Add more data in dashboard to see personalized insights.</p>
                     </div>
                 </div>
             </div >
