@@ -6,6 +6,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession, signIn, signOut } from "next-auth/react"
+import { Brain } from "lucide-react"
 
 import {
   NavigationMenu,
@@ -59,6 +60,7 @@ export default function Navbar() {
   const navItems = [
     { id: 'home', path: '/', label: 'Home', icon: icons.home },
     { id: 'dashboard', path: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
+    { id: 'clarity', path: '/clarity', label: 'Clarity', icon: <Brain /> },
     { id: 'logout', path: '', label: 'Logout', icon: icons.logoutIcon, onClick: () => signOut() },
   ];
 

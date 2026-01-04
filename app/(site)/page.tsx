@@ -4,13 +4,21 @@ import React, { useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
-import { ArrowRight, ArrowDown, Activity, Calendar, PieChart, Shield } from "lucide-react"
+import { ArrowDown, Activity, Calendar, Brain, Shield } from "lucide-react"
 import { useSession } from "next-auth/react";
 import { PreviewCard, PreviewCardPanel, PreviewCardTrigger } from "@/components/animate-ui/components/base/preview-card";
 
 const features = [
     {
         id: 1,
+        title: "Get Clarity",
+        subtitle: "CLARITY",
+        description: "Your AI assistant to answer all your period-related questions.",
+        color: "bg-pink-500", // Pink
+        icon: Brain,
+    },
+    {
+        id: 2,
         title: "Effortless Tracking",
         subtitle: "CYCLE",
         description: "Your central hub to log your data instantly.",
@@ -18,7 +26,7 @@ const features = [
         icon: Calendar,
     },
     {
-        id: 2,
+        id: 3,
         title: "Personalized Insights",
         subtitle: "INSIGHTS",
         description: "Know your cycle better with predictions & personalized insights.",
@@ -26,7 +34,7 @@ const features = [
         icon: Activity,
     },
     {
-        id: 3,
+        id: 4,
         title: "Secured Privacy",
         subtitle: "PRIVACY",
         description: "Secure login that keeps your cycle info only yours.",

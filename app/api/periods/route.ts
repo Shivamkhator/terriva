@@ -3,6 +3,7 @@ import { calculateInsights } from "@/lib/cycleInsights";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { embedPeriodData } from "@/lib/embeddings";
 
 // GET all periods for current user
 export async function GET(req: NextRequest) {
@@ -68,6 +69,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Embed the new/updated period data
+    await embedPeriodData(period);
+
+
     const allPeriods = await prisma.period.findMany({
       where: { userId: user.id },
     });
@@ -93,6 +98,8 @@ export async function POST(req: NextRequest) {
           totalPeriods: insights.totalPeriods,
         },
       });
+
+      const insightContent = `Cycle insights: Average cycle ${insights.avgCycleLength} days, average period ${insights.avgPeriodLength} days, next period predicted ${insights.nextPeriodDate?.toDateString()}`
 
     }
 

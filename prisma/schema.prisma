@@ -1,11 +1,12 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  previewFeatures = ["driverAdapters", "postgresqlExtensions"]
   output          = "../node_modules/.prisma/client"
 }
 
 datasource db {
   provider = "postgresql"
+    extensions = [vector]
 }
 
 model User {
@@ -24,6 +25,8 @@ model User {
   dailyFlows DailyFlow[]
 
   cycleInsight CycleInsight?
+
+  embeddings Embedding[]
 }
 
 model Account {
@@ -97,4 +100,18 @@ model CycleInsight {
   lastPeriodReminderSent DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Embedding {
+  id        String   @id @default(cuid())
+  userId    String
+  source    String   // period | flow | insight
+  sourceId  String
+  content   String
+  vector    Unsupported("vector(768)")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

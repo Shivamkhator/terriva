@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { embedDailyFlow } from "@/lib/embeddings"
 
 // GET all flows for current user
 export async function GET(req: NextRequest) {
@@ -65,6 +66,9 @@ export async function POST(req: NextRequest) {
         intensity,
       },
     });
+
+    // Embed the flow data for semantic search
+    await embedDailyFlow(flow);
 
     return NextResponse.json(flow);
   } catch (error) {
