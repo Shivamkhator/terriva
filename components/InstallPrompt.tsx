@@ -51,24 +51,20 @@ export default function InstallPrompt() {
 
   if (!showPrompt || isInstalled) return null
 
-  return (
+  return (isIOS && (
     <div
       className="fixed bottom-16 left-1/2 z-999 w-[90%] max-w-sm -translate-x-1/2 rounded-xl bg-primary px-4 py-3 text-center text-background shadow-lg animate-in slide-in-from-bottom-3 duration-300"
       role="dialog"
       aria-labelledby="install-title"
     >
-
-      {isIOS && (
-        <div className="flex flex-col items-center">
-          <p id="install-title" className="font-semibold">Install Terriva on Home Screen</p>
-          <p className="font-semibold text-sm">
-            Tap ⋮ and then
-            <br />
-            <span className="font-semibold text-sm">Add to Home Screen</span>
-          </p>
-        </div>
-      )
-      }
+      <div className="flex flex-col items-center">
+        <p id="install-title" className="font-semibold">Install Terriva on Home Screen</p>
+        <p className="font-semibold text-sm">
+          Tap ⋮ and then
+          <br />
+          <span className="font-semibold text-sm">Add to Home Screen</span>
+        </p>
       </div>
-  )
+    </div>
+  ))
 }

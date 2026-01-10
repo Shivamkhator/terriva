@@ -172,12 +172,18 @@ export default function Navbar() {
             {canInstall && (
               <button
                 onClick={install}
-                className="bg-white px-4 py-2 rounded-md mr-8 text-[#2F4F4F] font-medium text-sm transition-all" style={{
-                  border: "0.5px solid #2a2a2a",
-                }}>
-                Install
+                className="ml-6 flex items-center gap-2 px-4 py-2 rounded-md font-medium text-white transition-all hover:bg-white/10"
+                style={{ border: "0.5px solid #2a2a2a" }}
+              >
+                <span>Install</span>
+                {React.cloneElement(icons.install, {
+                  width: 16,
+                  height: 16,
+                  strokeWidth: 2,
+                })}
               </button>
             )}
+
           </div>
 
           <div className="flex items-center pr-16">
@@ -224,10 +230,10 @@ export default function Navbar() {
 
                 <div
                   className={`transition-all duration-300 ${isArmed
-                      ? "text-red-400 scale-110"
-                      : active
-                        ? "text-white"
-                        : "text-white/50"
+                    ? "text-red-400 scale-110"
+                    : active
+                      ? "text-white"
+                      : "text-white/50"
                     }`}
                 ></div>
 
