@@ -172,7 +172,7 @@ export default function Navbar() {
             {canInstall && (
               <button
                 onClick={install}
-                className="bg-white px-4 py-2 rounded-md text-[#2F4F4F] font-medium text-sm transition-all" style={{
+                className="bg-white px-4 py-2 rounded-md mr-8 text-[#2F4F4F] font-medium text-sm transition-all" style={{
                   border: "0.5px solid #2a2a2a",
                 }}>
                 Install
@@ -219,7 +219,7 @@ export default function Navbar() {
 
                 {/* Armed logout pulse */}
                 {isArmed && (
-                  <span className="absolute inset-0 bg-red-500/70 rounded-full -z-10 animate-pulse" />
+                  <span className="absolute inset-0 bg-red-600/40 rounded-full -z-10 animate-pulse" />
                 )}
 
                 <div

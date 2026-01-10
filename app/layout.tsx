@@ -46,7 +46,7 @@ export default function RootLayout({
       <body
         className={notoSerif.className}
       >
-        {/* <InstallPrompt /> */}
+        <InstallPrompt />
         <SessionProviderWrapper>
           {children}
         </SessionProviderWrapper>

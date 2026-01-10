@@ -49,54 +49,26 @@ export default function InstallPrompt() {
     }
   }, [isIOS, isInstalled])
 
-  const installApp = async () => {
-    if (!deferredPrompt) return
-
-    try {
-      await deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
-      
-      if (outcome === 'accepted') {
-        console.log('PWA installed')
-      }
-    } catch (error) {
-      console.error('Installation failed:', error)
-    } finally {
-      deferredPrompt = null
-      setShowPrompt(false)
-    }
-  }
-
-
   if (!showPrompt || isInstalled) return null
 
   return (
-    <div 
-      className="fixed bottom-5 left-1/2 z-999 w-[90%] max-w-sm -translate-x-1/2 rounded-xl bg-primary px-4 py-3 text-center text-background shadow-lg animate-in slide-in-from-bottom-3 duration-300"
+    <div
+      className="fixed bottom-16 left-1/2 z-999 w-[90%] max-w-sm -translate-x-1/2 rounded-xl bg-primary px-4 py-3 text-center text-background shadow-lg animate-in slide-in-from-bottom-3 duration-300"
       role="dialog"
       aria-labelledby="install-title"
     >
-      
-      {isIOS ? (
+
+      {isIOS && (
         <div className="flex flex-col items-center">
           <p id="install-title" className="font-semibold">Install Terriva on Home Screen</p>
           <p className="font-semibold text-sm">
             Tap ⋮ and then
-            <br/>
+            <br />
             <span className="font-semibold text-sm">Add to Home Screen</span>
           </p>
         </div>
-      ) : (
-        <div className="flex flex-row items-center justify-between">
-          <p id="install-title" className="font-semibold">Install Terriva on Home Screen</p>
-          <Button
-            onClick={installApp}
-            className="bg-white text-primary hover:bg-accent/90"
-          >
-            Install
-          </Button>
-        </div>
-      )}
-    </div>
+      )
+      }
+      </div>
   )
 }
