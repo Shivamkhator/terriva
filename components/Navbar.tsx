@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { FormEvent, MouseEvent } from "react";
+import { FormEvent, JSX, MouseEvent } from "react";
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession, signIn, signOut } from "next-auth/react"
 import { Brain } from "lucide-react"
 import { clearLockState } from "@/lib/passkeyLock";
-
+import { usePWAInstall } from "@/hooks/usePWAInstall"
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -16,12 +16,20 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu"
 
+interface NavItem {
+  id: string;
+  path: string;
+  label: string;
+  icon: JSX.Element;
+  onClick?: () => void | Promise<void>;
+}
+
 export default function Navbar() {
   const { data: session, status } = useSession()
   const pathname = usePathname()
   const [userMenuOpen, setUserMenuOpen] = React.useState(false)
-
-  const isActive = (path: string) => pathname === path
+  const { canInstall, install } = usePWAInstall()
+  const isActive = (path?: string) => pathname === path
   const isLoggedIn = status === "authenticated" && !!session
 
   const icons = {
@@ -55,21 +63,32 @@ export default function Navbar() {
         <line x1="21" y1="12" x2="9" y2="12" />
       </svg>
     ),
+    install: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M5 15l7 7 7-7M5 3h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /></svg>
+    )
   };
 
-
-  const navItems = [
+  const navItems: NavItem[] = [
     { id: 'home', path: '/', label: 'Home', icon: icons.home },
     { id: 'dashboard', path: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
     { id: 'clarity', path: '/clarity', label: 'Clarity', icon: <Brain /> },
-    { id: 'logout', path: '', label: 'Logout', icon: icons.logoutIcon, onClick: () => { clearLockState(); signOut(); } },
+    { id: 'logout',path: "", label: 'Logout', icon: icons.logoutIcon, onClick: () => { clearLockState(); signOut(); } },
   ];
 
-  const guestItems = [
+  const guestItems: NavItem[] = [
     { id: 'home', path: '/', label: 'Home', icon: icons.home },
     { id: 'login', path: '/login', label: 'Login', icon: icons.user, onClick: () => signIn() },
   ]
   const visibleItems = isLoggedIn ? navItems : guestItems
+  if (canInstall) {
+    visibleItems.push({
+      id: "install",
+      path: "",
+      label: "Install",
+      icon: icons.install,
+      onClick: install,
+    })
+  }
 
   return (
     <>
@@ -112,6 +131,14 @@ export default function Navbar() {
                 ))}
               </NavigationMenuList>
             </NavigationMenu>
+            {canInstall && (
+              <button
+                onClick={install}
+                className="bg-white px-4 py-2 rounded-md text-[#2F4F4F] font-medium text-sm"
+              >
+                Install App
+              </button>
+            )}
           </div>
 
           <div className="flex items-center pr-16">
