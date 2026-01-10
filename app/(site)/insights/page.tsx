@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import { PasskeyGuard } from "@/components/PasskeyGuard"
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import InsightsClient from "./InsightsClient";
@@ -8,5 +9,5 @@ export default async function InsightsPage() {
 
   if (!session) redirect("/login");
 
-  return <InsightsClient user={session.user} />;
+  return (<PasskeyGuard><InsightsClient user={session.user} /></PasskeyGuard>);
 }

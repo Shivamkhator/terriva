@@ -1,74 +1,152 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { startRegistration } from "@simplewebauthn/browser"
+import { useSession } from "next-auth/react"
+import { startRegistration, startAuthentication } from "@simplewebauthn/browser"
 import { setLockState } from "@/lib/passkeyLock"
+
 export function UnlockScreen() {
   const [isVerifying, setIsVerifying] = useState(false)
+  const [hasPasskeys, setHasPasskeys] = useState<boolean | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const { data: session } = useSession()
+
+  useEffect(() => {
+    checkPasskeys()
+  }, [])
+
+  async function checkPasskeys() {
+    try {
+      const res = await fetch("/api/passkey/check")
+      const data = await res.json()
+      setHasPasskeys(data.hasPasskeys)
+    } catch (error) {
+      console.error("Failed to check passkeys:", error)
+      setHasPasskeys(false)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   async function handleCreate() {
     setIsVerifying(true)
-    const res = await fetch("/api/passkey/register/options", {
-      method: "POST",
-    })
-
-    console.log("STATUS:", res.status)
-
-    const options = await res.json()
-
-    console.log("PARSED OPTIONS:", options)
-
-    if (!options?.challenge) {
-      alert("❌ Server did not return WebAuthn options")
-      return
-    }
-
-    const attestation = await startRegistration({ optionsJSON: options })
-
-    const verifyRes = await fetch("/api/passkey/register/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(attestation),
-    })
-
-    if (verifyRes.ok) {
-      setLockState({
-        isUnlocked: true,
-        unlockedAt: Date.now()
+    try {
+      const res = await fetch("/api/passkey/register/options", {
+        method: "POST",
       })
-      router.refresh()
-    }
-    else {
-      const err = await verifyRes.text()
-      alert("❌ Passkey creation failed: " + err)
+
+      const options = await res.json()
+
+      if (!options?.challenge) {
+        alert("❌ Server did not return WebAuthn options")
+        setIsVerifying(false)
+        return
+      }
+
+      const attestation = await startRegistration({ optionsJSON: options })
+
+      const verifyRes = await fetch("/api/passkey/register/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(attestation),
+      })
+
+      if (verifyRes.ok) {
+        setLockState({
+          isUnlocked: true,
+          unlockedAt: Date.now(),
+          userId: session?.user?.id
+        })
+        window.location.href = window.location.pathname
+      } else {
+        const err = await verifyRes.text()
+        alert("❌ Passkey creation failed: " + err)
+        setIsVerifying(false)
+      }
+    } catch (error) {
+      console.error("Passkey creation error:", error)
+      alert("❌ Passkey creation failed")
       setIsVerifying(false)
     }
   }
 
+  async function handleVerify() {
+    setIsVerifying(true)
+    try {
+      const res = await fetch("/api/passkey/auth/options", {
+        method: "POST",
+      })
 
+      const options = await res.json()
+
+      if (!options?.challenge) {
+        alert("❌ Server did not return authentication options")
+        setIsVerifying(false)
+        return
+      }
+
+      const assertion = await startAuthentication({ optionsJSON: options })
+
+      const verifyRes = await fetch("/api/passkey/auth/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(assertion),
+      })
+
+      if (verifyRes.ok) {
+        setLockState({
+          isUnlocked: true,
+          unlockedAt: Date.now(),
+          userId: session?.user?.id
+        })
+        window.location.href = window.location.pathname
+      } else {
+        const err = await verifyRes.text()
+        alert("❌ Passkey verification failed: " + err)
+        setIsVerifying(false)
+      }
+    } catch (error) {
+      console.error("Passkey verification error:", error)
+      alert("❌ Passkey verification failed")
+      setIsVerifying(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <p className="text-sm text-gray-500">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="text-center space-y-4">
         <h2 className="text-xl font-semibold">
-          Unlock with Passkey
+          {hasPasskeys ? "Unlock with Passkey" : "Create Passkey"}
         </h2>
         <p className="text-sm text-gray-500">
-          Verify with your device to continue
+          {hasPasskeys
+            ? "Verify with your device to continue"
+            : "Create a passkey to secure your account"}
         </p>
 
         <button
-          onClick={handleCreate}
+          onClick={hasPasskeys ? handleVerify : handleCreate}
           disabled={isVerifying}
-          className="px-4 py-2 rounded bg-black text-white hover:bg-gray-800"
+          className="px-4 py-2 rounded bg-primary text-white hover:transform hover:scale-105 disabled:opacity-50"
         >
-          {isVerifying ? "Verifying..." : "Create Passkey"}
+          {isVerifying
+            ? "Verifying..."
+            : hasPasskeys
+              ? "Verify Passkey"
+              : "Create Passkey"}
         </button>
       </div>
-
     </div>
-
   )
 }
-

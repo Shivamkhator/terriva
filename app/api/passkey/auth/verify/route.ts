@@ -8,11 +8,10 @@ import { rpID, origin } from "@/lib/webauthn";
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    const body = await req.json(); // The 'assertion' from frontend
+    const body = await req.json();
 
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // 1. Get the challenge and the specific passkey used
     const [challengeRecord, passkey] = await Promise.all([
       prisma.passkeyChallenge.findUnique({ where: { userId: session.user.id } }),
       prisma.passkey.findUnique({ where: { credentialId: body.id } })
@@ -22,7 +21,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing challenge or passkey" }, { status: 400 });
     }
 
-    // 2. Verify the signature
     const verification = await verifyAuthenticationResponse({
       response: body,
       expectedChallenge: challengeRecord.challenge,
@@ -36,13 +34,11 @@ export async function POST(req: Request) {
     });
 
     if (verification.verified) {
-      // 3. Update counter (security requirement to prevent clones)
       await prisma.passkey.update({
         where: { credentialId: passkey.credentialId },
         data: { counter: verification.authenticationInfo.newCounter }
       });
 
-      // Cleanup challenge
       await prisma.passkeyChallenge.delete({ where: { userId: session.user.id } });
 
       return NextResponse.json({ success: true });

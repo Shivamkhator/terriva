@@ -15,7 +15,6 @@ export async function POST(req: Request) {
 
     const body = await req.json()
 
-    // 1. Get the challenge we saved during the /options call
     const challengeRecord = await prisma.passkeyChallenge.findUnique({
       where: { userId: session.user.id },
     })
@@ -24,7 +23,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Challenge not found" }, { status: 400 })
     }
 
-    // 2. Verify the response from the browser
     const verification = await verifyRegistrationResponse({
       response: body,
       expectedChallenge: challengeRecord.challenge,
@@ -33,10 +31,8 @@ export async function POST(req: Request) {
       requireUserVerification: true
     })
 
-    // 3. Handle verification results
     if (verification.verified && verification.registrationInfo) {
       const { credential } = verification.registrationInfo
-      // 4. Store the new passkey in the database
       await prisma.passkey.create({
         data: {
           userId: session.user.id,
@@ -47,7 +43,6 @@ export async function POST(req: Request) {
         }
       })
 
-      // 5. Cleanup: Delete the used challenge
       await prisma.passkeyChallenge.delete({
         where: { userId: session.user.id }
       })

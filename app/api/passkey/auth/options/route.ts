@@ -10,7 +10,6 @@ export async function POST() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Find user's existing passkeys
     const userPasskeys = await prisma.passkey.findMany({
       where: { userId: session.user.id },
     });
@@ -29,7 +28,6 @@ export async function POST() {
       userVerification: 'required',
     });
 
-    // Save challenge to verify later
     await prisma.passkeyChallenge.upsert({
       where: { userId: session.user.id },
       update: { challenge: options.challenge },
