@@ -39,7 +39,6 @@ export function UnlockScreen() {
       const options = await res.json()
 
       if (!options?.challenge) {
-        alert("❌ Server did not return WebAuthn options")
         setIsVerifying(false)
         return
       }
@@ -61,12 +60,10 @@ export function UnlockScreen() {
         window.location.href = window.location.pathname
       } else {
         const err = await verifyRes.text()
-        alert("❌ Passkey creation failed: " + err)
         setIsVerifying(false)
       }
     } catch (error) {
       console.error("Passkey creation error:", error)
-      alert("❌ Passkey creation failed")
       setIsVerifying(false)
     }
   }
@@ -81,7 +78,6 @@ export function UnlockScreen() {
       const options = await res.json()
 
       if (!options?.challenge) {
-        alert("❌ Server did not return authentication options")
         setIsVerifying(false)
         return
       }
@@ -103,13 +99,12 @@ export function UnlockScreen() {
         window.location.href = window.location.pathname
       } else {
         const err = await verifyRes.text()
-        alert("❌ Passkey verification failed: " + err)
         setIsVerifying(false)
       }
     } catch (error) {
       console.error("Passkey verification error:", error)
-      alert("❌ Passkey verification failed")
       setIsVerifying(false)
+      
     }
   }
 
@@ -125,7 +120,7 @@ export function UnlockScreen() {
 
   return (
     <div className="flex h-screen items-center justify-center">
-      <div className="text-center space-y-4">
+      <div className="text-center space-y-2">
         <h2 className="text-xl font-semibold">
           {hasPasskeys ? "Unlock with Passkey" : "Create Passkey"}
         </h2>
@@ -138,7 +133,7 @@ export function UnlockScreen() {
         <button
           onClick={hasPasskeys ? handleVerify : handleCreate}
           disabled={isVerifying}
-          className="px-4 py-2 rounded bg-primary text-white hover:transform hover:scale-105 disabled:opacity-50"
+          className="px-4 py-2 mt-6 rounded-lg bg-primary text-white text-lg hover:transform hover:scale-105 disabled:opacity-50"
         >
           {isVerifying
             ? "Verifying..."

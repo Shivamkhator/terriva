@@ -274,9 +274,15 @@ function FooterSection() {
                 </PreviewCardPanel>
             </PreviewCard>
             <div className="flex gap-4 lg:flex-row flex-col items-center">
-                <Link href="/insights" className="py-4 w-[32vw] lg:w-[12vw] border border-white/20 text-white font-bold rounded-full hover:bg-white/10 transition-colors hover:scale-105 text-xs md:text-lg">
-                    {session ? "View Insights" : "Login"}
+                <Link
+                    href={session ? "/clarity" : "/login"}
+                    className="py-4 w-[32vw] lg:w-[12vw] 
+             border border-white/20 text-white font-bold rounded-full hover:bg-white/10 
+             md:text-lg"
+                >
+                    {session ? "Get Clarity" : "Unlock Clarity"}
                 </Link>
+
                 <Link href="https://instagram.com/weareskybee" className="heart-btn">
                     <span aria-hidden="true"></span>
                     <span className="text-sm w-[24vw] lg:w-[8vw] my-2">Follow Us</span>
