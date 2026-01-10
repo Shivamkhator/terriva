@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import { PasskeyGuard } from "@/components/PasskeyGuard"
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import DashboardClient from "./DashboardClient";
@@ -8,5 +9,5 @@ export default async function DashboardPage() {
 
   if (!session) redirect("/login");
 
-  return <DashboardClient user={session.user} />;
+  return (<PasskeyGuard><DashboardClient user={session.user} /></PasskeyGuard>);
 }

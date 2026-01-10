@@ -27,7 +27,6 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { type DateRange } from "react-day-picker";
 import { useRouter } from "next/navigation";
-
 import { Session } from "next-auth";
 
 type DashboardClientProps = {
@@ -313,7 +312,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                             <div>
                                 <div className="mb-2 text-2xl md:text-3xl font-semibold">
                                     <span className="items-center gap-2">
-                                        {greeting}, {user.name?.split(" ")[0]}!
+                                        {greeting}, {user.name?.split(" ")[0] || "User"}!
                                     </span>
                                 </div>
                                 <p className="opacity-70 text-sm flex items-center gap-1">
