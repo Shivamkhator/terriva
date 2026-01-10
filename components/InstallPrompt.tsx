@@ -53,7 +53,7 @@ export default function InstallPrompt() {
 
   return (isIOS && (
     <div
-      className="fixed bottom-16 left-1/2 z-999 w-[90%] max-w-sm -translate-x-1/2 rounded-xl bg-primary px-4 py-3 text-center text-background shadow-lg animate-in slide-in-from-bottom-3 duration-300"
+      className="fixed bottom-20 left-1/2 z-999 w-[90%] max-w-sm -translate-x-1/2 rounded-xl bg-primary px-4 py-3 text-center text-background shadow-lg animate-in slide-in-from-bottom-3 duration-300"
       role="dialog"
       aria-labelledby="install-title"
     >
