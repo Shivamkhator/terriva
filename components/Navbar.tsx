@@ -28,6 +28,7 @@ export default function Navbar() {
   const { data: session, status } = useSession()
   const pathname = usePathname()
   const [userMenuOpen, setUserMenuOpen] = React.useState(false)
+  const [logoutArmed, setLogoutArmed] = React.useState(false)
   const { canInstall, install } = usePWAInstall()
   const isActive = (path?: string) => pathname === path
   const isLoggedIn = status === "authenticated" && !!session
@@ -63,16 +64,46 @@ export default function Navbar() {
         <line x1="21" y1="12" x2="9" y2="12" />
       </svg>
     ),
-    install: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M5 15l7 7 7-7M5 3h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /></svg>
+    install: (<svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3v12" />
+      <path d="M8 11l4 4 4-4" />
+      <path d="M5 21h14" />
+    </svg>
+
     )
   };
+
+  const handleMobileLogout = React.useCallback(() => {
+    if (!logoutArmed) {
+      setLogoutArmed(true)
+
+      setTimeout(() => {
+        setLogoutArmed(false)
+      }, 1000)
+
+      return
+    }
+
+    clearLockState()
+    signOut()
+  }, [logoutArmed])
+
 
   const navItems: NavItem[] = [
     { id: 'home', path: '/', label: 'Home', icon: icons.home },
     { id: 'dashboard', path: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
     { id: 'clarity', path: '/clarity', label: 'Clarity', icon: <Brain /> },
-    { id: 'logout',path: "", label: 'Logout', icon: icons.logoutIcon, onClick: () => { clearLockState(); signOut(); } },
+    { id: 'logout', path: "", label: 'Logout', icon: icons.logoutIcon, onClick: () => { clearLockState(); signOut(); } },
   ];
 
   const guestItems: NavItem[] = [
@@ -80,16 +111,23 @@ export default function Navbar() {
     { id: 'login', path: '/login', label: 'Login', icon: icons.user, onClick: () => signIn() },
   ]
   const visibleItems = isLoggedIn ? navItems : guestItems
-  if (canInstall) {
-    visibleItems.push({
-      id: "install",
-      path: "",
-      label: "Install",
-      icon: icons.install,
-      onClick: install,
+  const visbleMobileItems: NavItem[] = React.useMemo(() => {
+    const base = visibleItems.map(item => {
+      if (item.id === 'logout') {
+        return {
+          ...item,
+          onClick: handleMobileLogout
+        }
+      }
+      return item
     })
-  }
 
+    if (!canInstall) return base
+    return [
+      ...base,
+      { id: 'install', path: '', label: 'Install', icon: icons.install, onClick: install }
+    ]
+  }, [canInstall, visibleItems, install, icons.install])
   return (
     <>
       <div className="hidden md:block w-full fixed bg-[#2F4F4F] top-0 z-99 backdrop-blur-md border-b border-white/10 shadow-xl text-sm">
@@ -134,9 +172,10 @@ export default function Navbar() {
             {canInstall && (
               <button
                 onClick={install}
-                className="bg-white px-4 py-2 rounded-md text-[#2F4F4F] font-medium text-sm"
-              >
-                Install App
+                className="bg-white px-4 py-2 rounded-md text-[#2F4F4F] font-medium text-sm transition-all" style={{
+                  border: "0.5px solid #2a2a2a",
+                }}>
+                Install
               </button>
             )}
           </div>
@@ -162,45 +201,63 @@ export default function Navbar() {
       </div>
 
       <nav className="md:hidden gap-4 fixed bottom-6 left-1/2 -translate-x-1/2 h-16 px-2 bg-primary backdrop-blur-xl rounded-full border border-black/30 shadow-xl z-99 flex justify-around items-center">
-        {visibleItems.map((item) => {
-          const active = isActive(item.path)
+        {
+          visbleMobileItems.map((item) => {
+            const active = isActive(item.path)
+            const isLogout = item.id === "logout"
+            const isArmed = isLogout && logoutArmed
 
-          // Wrapper Class: Shared styling for both Links and Buttons
-          const itemClass = "relative flex flex-col items-center justify-center w-12 h-12"
+            // Wrapper Class: Shared styling for both Links and Buttons
+            const itemClass = "relative flex flex-col items-center justify-center w-12 h-12"
 
-          // Inner Content: The Icon + Active Background
-          const content = (
-            <>
-              {active && (
-                <span className="absolute inset-0 bg-white/20 rounded-full scale-100 transition-transform duration-300 -z-10" />
-              )}
-              <div className={`transition-all duration-300 ${active ? 'text-white' : 'text-white/50'}`}>
-                {React.cloneElement(item.icon, {
-                  width: active ? 24 : 22,
-                  height: active ? 24 : 22,
-                  strokeWidth: active ? 2 : 1.5
-                })}
-              </div>
-            </>
-          )
+            // Inner Content: The Icon + Active Background
+            const content = (
+              <>
+                {active && !isArmed && (
+                  <span className="absolute inset-0 bg-white/20 rounded-full scale-100 transition-transform duration-300 -z-10" />
+                )}
 
-          return (
-            item.onClick ? (
+                {/* Armed logout pulse */}
+                {isArmed && (
+                  <span className="absolute inset-0 bg-red-500/70 rounded-full -z-10 animate-pulse" />
+                )}
 
-              <button
-                key={item.id}
-                onClick={item.onClick}
-                className={itemClass}
-              >
-                {content}
-              </button>
-            ) : (
-              <Link key={item.id} href={item.path} className={itemClass}>
-                {content}
-              </Link>
+                <div
+                  className={`transition-all duration-300 ${isArmed
+                      ? "text-red-400 scale-110"
+                      : active
+                        ? "text-white"
+                        : "text-white/50"
+                    }`}
+                ></div>
+
+                <div className={`transition-all duration-300 ${active ? 'text-white' : 'text-white/50'}`}>
+                  {React.cloneElement(item.icon, {
+                    width: active || isArmed ? 24 : 22,
+                    height: active || isArmed ? 24 : 22,
+                    strokeWidth: active || isArmed ? 2 : 1.5
+                  })}
+                </div>
+              </>
             )
-          )
-        })}
+
+            return (
+              item.onClick ? (
+
+                <button
+                  key={item.id}
+                  onClick={item.onClick}
+                  className={itemClass}
+                >
+                  {content}
+                </button>
+              ) : (
+                <Link key={item.id} href={item.path} className={itemClass}>
+                  {content}
+                </Link>
+              )
+            )
+          })}
       </nav>
     </>
   )
