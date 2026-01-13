@@ -104,7 +104,7 @@ export function UnlockScreen() {
     } catch (error) {
       console.error("Passkey verification error:", error)
       setIsVerifying(false)
-      
+
     }
   }
 
@@ -129,18 +129,28 @@ export function UnlockScreen() {
             ? "Verify with your device to continue"
             : "Create a passkey to secure your account"}
         </p>
+        <div className="flex flex-col">
+          <button
+            onClick={hasPasskeys ? handleVerify : handleCreate}
+            disabled={isVerifying}
+            className="px-4 py-2 mt-6 rounded-lg bg-primary text-white text-lg hover:transform hover:scale-105 disabled:opacity-50"
+          >
+            {isVerifying
+              ? "Verifying..."
+              : hasPasskeys
+                ? "Verify Passkey"
+                : "Create Passkey"}
+          </button>
 
-        <button
-          onClick={hasPasskeys ? handleVerify : handleCreate}
-          disabled={isVerifying}
-          className="px-4 py-2 mt-6 rounded-lg bg-primary text-white text-lg hover:transform hover:scale-105 disabled:opacity-50"
-        >
-          {isVerifying
-            ? "Verifying..."
-            : hasPasskeys
-              ? "Verify Passkey"
-              : "Create Passkey"}
-        </button>
+          {hasPasskeys && !isVerifying && (
+            <button
+              onClick={handleCreate}
+              className="px-4 py-2 mt-2 rounded-lg bg-accent text-white text-lg hover:transform hover:scale-105"
+            >
+              Add New Passkey
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
