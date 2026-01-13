@@ -34,12 +34,13 @@ export async function POST(req: Request) {
     if (verification.verified && verification.registrationInfo) {
       const { credential } = verification.registrationInfo
       await prisma.passkey.create({
-        data: {
+        data: { 
           userId: session.user.id,
-          credentialId: credential.id, 
+          credentialId: credential.id,
           publicKey: Buffer.from(credential.publicKey).toString("base64url"),
           counter: credential.counter,
-          transports: credential.transports ? JSON.stringify(credential.transports) : null
+          transports: credential.transports ? JSON.stringify(credential.transports) : null,
+          deviceName: body.deviceName || "Unknown Device"
         }
       })
 
