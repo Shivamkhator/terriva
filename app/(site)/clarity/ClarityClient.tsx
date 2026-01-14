@@ -106,6 +106,13 @@ export default function ClarityPage({ user }: ClarityClientProps) {
                         </div>
                     </div>
                 </div>
+                {loadingInsights ? (
+                    <div className=" flex flex-col bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-5 lg:row-span-2">
+                        <div className="flex flex-col items-center justify-center h-[40svh]">
+                            <video src="/Loader.webm" className="mx-auto w-16 h-16" autoPlay loop muted />
+                        </div>
+                    </div>
+                ) : (
                 <div className=" flex flex-col bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-5 lg:row-span-2">
                     <div className="flex flex-col items-center justify-center h-[40svh]">
                         <Brain className="h-12 w-12 text-pink-500 mb-4" />
@@ -113,6 +120,7 @@ export default function ClarityPage({ user }: ClarityClientProps) {
                         <p className='text-gray-400 text-sm text-center'>Add more data in dashboard to chat with Terriva.</p>
                     </div>
                 </div>
+                )}
             </div >
         )
     }
@@ -159,6 +167,7 @@ export default function ClarityPage({ user }: ClarityClientProps) {
                         <Input
                             placeholder="Ask anything to Terriva..."
                             value={question}
+                            disabled={loading}
                             onChange={(e) => setQuestion(e.target.value)}
                             onKeyDown={(e) => e.key === "Enter" && handleAsk()}
                             className="h-12"

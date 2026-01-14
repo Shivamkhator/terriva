@@ -82,6 +82,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     });
 
     const [periods, setPeriods] = React.useState<Period[]>([]);
+    const [loadingPeriods, setLoadingPeriods] = React.useState(true);
     const [dailyFlows, setDailyFlows] = React.useState<DailyFlow[]>([]);
     const [historyMonth, setHistoryMonth] = React.useState<Date>(new Date());
 
@@ -98,6 +99,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     }, []);
 
     useEffect(() => {
+        setLoadingPeriods(true);
         const loadData = async () => {
             try {
                 // Fetch periods
@@ -124,9 +126,8 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                 console.error('Error loading data:', error);
             }
         };
-        loadData();
+        loadData().finally(() => setLoadingPeriods(false));
     }, []);
-
     // Sort periods by actual start date (most recent first) for display
     const sortedPeriods = React.useMemo(() => {
         return [...periods].sort((a, b) => b.startDate.getTime() - a.startDate.getTime());
@@ -296,6 +297,19 @@ export default function DashboardClient({ user }: DashboardClientProps) {
         }
     };
 
+    function calculateNextPeriodDays() {
+        if (!insights?.nextPeriodDate) return null;
+        const today = new Date();
+        const nextPeriod = new Date(insights.nextPeriodDate);
+        return daysBetween(today, nextPeriod);
+    }
+
+    function daysBetween(start: Date, end: Date) {
+    return Math.floor(
+        (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+    ) + 1;
+}
+
 
     return (
         <div className="min-h-screen">
@@ -316,7 +330,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                     </span>
                                 </div>
                                 <p className="opacity-70 text-sm flex items-center gap-1">
-                                    {insights ? ("Your insights are ready to be explored") : ("Track more cycles to unlock personalized insights")}
+                                    {insights ? (<span>Your next periods are in <span className="font-bold italic">{calculateNextPeriodDays()} Days</span></span>) : ("Track more cycles to unlock personalized insights")}
                                 </p>
                             </div>
 
@@ -334,7 +348,6 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                         </div>
                     </div>
                 </div>
-
                 <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 flex items-center justify-between">
                     <div>
                         <p className="text-sm font-semibold text-primary">
@@ -699,6 +712,12 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
+
+                            {loadingPeriods ? (
+                                <div className="flex items-center justify-center py-8">
+                                    <video src="/Loader.webm" className="mx-auto w-12 h-12" autoPlay loop muted />
+                                </div>
+                            ) : (
                             <div className="space-y-3">
                                 {sortedPeriods.map((period) => {
                                     const start = new Date(period.startDate);
@@ -730,6 +749,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                     );
                                 })}
                             </div>
+                            )}
                         </CardContent>
                     </Card>
                 )}

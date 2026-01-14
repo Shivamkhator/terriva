@@ -112,7 +112,7 @@ export function UnlockScreen() {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <p className="text-sm text-gray-500">Loading...</p>
+          <video src="/Loader.webm" className="mx-auto w-16 h-16" autoPlay loop muted />
         </div>
       </div>
     )
