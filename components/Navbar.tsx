@@ -89,7 +89,7 @@ export default function Navbar() {
 
       setTimeout(() => {
         setLogoutArmed(false)
-      }, 1000)
+      }, 3000)
 
       return
     }
@@ -225,7 +225,7 @@ export default function Navbar() {
 
                 {/* Armed logout pulse */}
                 {isArmed && (
-                  <span className="absolute inset-0 bg-red-600/40 rounded-full -z-10 animate-pulse" />
+                  <span className="absolute inset-0 bg-red-400/60 rounded-full -z-10 animate-pulse" />
                 )}
 
                 <div

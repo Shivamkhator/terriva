@@ -330,7 +330,8 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                     </span>
                                 </div>
                                 <p className="opacity-70 text-sm flex items-center gap-1">
-                                    {insights ? (<span>Your next periods are in <span className="font-bold italic">{calculateNextPeriodDays()} Days</span></span>) : ("Track more cycles to unlock personalized insights")}
+                                    {insights ? (<span>Your next period is in <span className="font-bold italic">{calculateNextPeriodDays()} day{calculateNextPeriodDays() === 1 ? "" : "s"}
+                                        </span></span>) : ("Track more cycles to unlock personalized insights")}
                                 </p>
                             </div>
 
