@@ -43,7 +43,7 @@ const features = [
     }
 ]
 
-export default function PeriodTrackerHome() {
+export default function TerrivaHome() {
     const containerRef = useRef<HTMLDivElement>(null)
     const { scrollYProgress } = useScroll({
         target: containerRef,
