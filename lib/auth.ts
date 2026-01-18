@@ -144,6 +144,7 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      httpOptions: { timeout: 40000 },
     }),
   ],
 
@@ -168,6 +169,10 @@ export const authOptions: NextAuthOptions = {
     },
   },
     callbacks: {
+      async signIn({ user, account, profile}) {
+        delete user.image
+        return true
+      },
       async session({ session, token }) {
         if (session.user && token.sub) {
           session.user.id = token.sub // ✅ ALWAYS EXISTS
