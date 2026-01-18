@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { FormEvent, JSX, MouseEvent } from "react";
+import { FormEvent, JSX, MouseEvent, useMemo } from "react";
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -82,6 +82,11 @@ export default function Navbar() {
 
     )
   };
+
+  const greeting = useMemo(
+          () => (Math.random() > 0.5 ? "Namaste" : "Konnichiwa"),
+          []
+      );
 
   const handleMobileLogout = React.useCallback(() => {
     if (!logoutArmed) {
@@ -195,11 +200,7 @@ export default function Navbar() {
               </button>
             ) : (
               <div className="relative inline-flex items-center gap-2 rounded-md py-1 text-sm font-medium">
-
-                <span className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-[#2F4F4F] text-sm">
-                  {session.user.image ? session.user.name?.charAt(0).toUpperCase() : "U"}
-                </span>
-                <span className="hidden lg:inline-block text-white font-semibold">{session.user?.name || session.user?.email || "User"}</span>
+                <span className="hidden lg:inline-block text-white font-semibold">{greeting}, {session.user?.name || session.user?.email || "User"}</span>
               </div>
             )}
           </div>
