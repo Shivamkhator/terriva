@@ -590,8 +590,21 @@ export default function InsightsClient({ user }: CycleClientProps) {
                                         <p className="font-semibold text-xl text-gray-700">{formatDate(lastPeriod()?.startDate) || "--"}</p>
                                     </div>
                                     <div className=" p-3 rounded-xl">
-                                        <p className="text-xs uppercase text-gray-400 font-bold">Next Periods in</p>
-                                        <p className="font-semibold text-xl text-gray-700">{calculateNextPeriodDays() || "--"} Days</p>
+                                        <p className="text-xs uppercase text-gray-400 font-bold">{(() => {
+                                                const days = calculateNextPeriodDays();
+                                                if (days === null) return "--";
+                                                if (days < 1) return "Next Period";
+                                                return "Next Period in";
+                                            })()}</p>
+                                        <p className="font-semibold text-xl text-gray-700">
+                                            {(() => {
+                                                const days = calculateNextPeriodDays();
+                                                if (days === null) return "--";
+                                                if (days < 1) return "May start soon";
+                                                if (days === 1) return "1 day";
+                                                return `${days} days`;
+                                            })()}
+                                        </p>
                                     </div>
                                     <div className=" p-3 rounded-xl">
                                         <p className="text-xs uppercase text-gray-400 font-bold">Avg. Period Length</p>

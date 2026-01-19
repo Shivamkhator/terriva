@@ -305,10 +305,10 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     }
 
     function daysBetween(start: Date, end: Date) {
-    return Math.floor(
-        (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
-    ) + 1;
-}
+        return Math.floor(
+            (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+        ) + 1;
+    }
 
 
     return (
@@ -330,8 +330,14 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                     </span>
                                 </div>
                                 <p className="opacity-70 text-sm flex items-center gap-1">
-                                    {insights ? (<span>Your next period is in <span className="font-bold italic">{calculateNextPeriodDays()} day{calculateNextPeriodDays() === 1 ? "" : "s"}
-                                        </span></span>) : ("Track more cycles to unlock personalized insights")}
+                                    {insights ? (
+                                        <span>{(() => {
+                                            const days = calculateNextPeriodDays();
+                                            if (days === null) return "--";
+                                            if (days < 1) return "Your next period may start soon";
+                                            if (days === 1) return "Your next period is in 1 day";
+                                            return `Your next period is in ${days} days`;
+                                        })()}</span>) : ("Track more cycles to unlock personalized insights")}
                                 </p>
                             </div>
 
@@ -719,37 +725,37 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                     <video src="/Loader.webm" className="mx-auto w-12 h-12" autoPlay loop muted />
                                 </div>
                             ) : (
-                            <div className="space-y-3">
-                                {sortedPeriods.map((period) => {
-                                    const start = new Date(period.startDate);
-                                    const end = period.endDate ? new Date(period.endDate) : start;
-                                    const length = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                                <div className="space-y-3">
+                                    {sortedPeriods.map((period) => {
+                                        const start = new Date(period.startDate);
+                                        const end = period.endDate ? new Date(period.endDate) : start;
+                                        const length = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-                                    return (
-                                        <div
-                                            key={period.id}
-                                            className="flex justify-between items-center p-4 bg-linear-to-r from-pink-50 to-purple-50 rounded-xl border-2 border-pink-100 hover:shadow-md transition-all group"
-                                        >
-                                            <div>
-                                                <p className="font-semibold text-sm text-gray-800">
-                                                    {formatDate(period.startDate)} → {period.endDate ? formatDate(period.endDate) : "Ongoing"}
-                                                </p>
-                                                <p className="text-xs text-gray-600 mt-1">
-                                                    Duration: <span className="font-medium text-pink-600">{length} day{length > 1 ? "s" : ""}</span>
-                                                </p>
-                                            </div>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => deletePeriod(period.id)}
-                                                className="transition-colors opacity-100"
+                                        return (
+                                            <div
+                                                key={period.id}
+                                                className="flex justify-between items-center p-4 bg-linear-to-r from-pink-50 to-purple-50 rounded-xl border-2 border-pink-100 hover:shadow-md transition-all group"
                                             >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                                <div>
+                                                    <p className="font-semibold text-sm text-gray-800">
+                                                        {formatDate(period.startDate)} → {period.endDate ? formatDate(period.endDate) : "Ongoing"}
+                                                    </p>
+                                                    <p className="text-xs text-gray-600 mt-1">
+                                                        Duration: <span className="font-medium text-pink-600">{length} day{length > 1 ? "s" : ""}</span>
+                                                    </p>
+                                                </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => deletePeriod(period.id)}
+                                                    className="transition-colors opacity-100"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             )}
                         </CardContent>
                     </Card>
