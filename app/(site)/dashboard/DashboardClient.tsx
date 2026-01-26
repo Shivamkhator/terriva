@@ -67,9 +67,10 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     const [emailEnabled, setEmailEnabled] = React.useState(false);
     const [savingEmailPref, setSavingEmailPref] = React.useState(false);
     const [flowDate, setFlowDate] = React.useState<Date | undefined>(undefined);
-    const [flow, setFlow] = useState(1);
+    const [flow, setFlow] = React.useState(1);
     const [openFlowDate, setOpenFlowDate] = React.useState(false);
 
+    const [selectedDate, setSelectedDate] = React.useState<string | null>(null);
 
     const router = useRouter();
 
@@ -481,7 +482,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                             selected={flowDate}
                                                             defaultMonth={flowDate ?? today}
                                                             captionLayout="dropdown"
-                                                            className="rounded-lg border-0 w-[16rem]"
+                                                            className="border-0 w-[16rem]"
                                                             disabled={(date) => {
                                                                 const d = new Date(date);
                                                                 d.setHours(0, 0, 0, 0);
@@ -578,7 +579,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                                 selected={dateRange.from}
                                                                 defaultMonth={dateRange.from ?? today}
                                                                 captionLayout="dropdown"
-                                                                className="rounded-lg border-0 w-[16rem]"
+                                                                className="border-0 w-[16rem]"
                                                                 modifiers={modifiers}
                                                                 disabled={(date) => {
                                                                     const d = new Date(date);
@@ -643,7 +644,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                                     selected={dateRange.to}
                                                                     defaultMonth={dateRange.to ?? dateRange.from ?? today}
                                                                     captionLayout="dropdown"
-                                                                    className="rounded-lg border-0 w-[16rem]"
+                                                                    className="border-0 w-[16rem]"
                                                                     modifiers={modifiers}
                                                                     disabled={(date) => {
                                                                         const d = new Date(date);
@@ -743,6 +744,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                         predicted: insights?.nextPredicted ? [insights.nextPredicted] : [],
                                     }}
                                     components={{
+
                                         Day: (props: any) => {
                                             const { day } = props;
                                             if (!day) return <div />;
@@ -770,30 +772,48 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                 }
                                             }
 
+                                            const hasInfo = flowState || isPeriodDay;
+                                            const isSelected = selectedDate === dateStr;
 
                                             return (
                                                 <div className="relative w-full h-full flex items-center justify-center group">
                                                     <div
-                                                        className="w-[8vw] h-[8vw] flex items-center justify-center text-xs md:text-sm font-medium transition-all hover:scale-105 cursor-default border border-gray-primary/10 rounded-md"
+                                                        onClick={() => {
+                                                            if (hasInfo) {
+                                                                setSelectedDate(isSelected ? null : dateStr);
+                                                            }
+                                                        }}
+                                                        className={`w-[8vw] h-[8vw] flex items-center justify-center text-xs md:text-sm font-medium transition-all hover:scale-105 border border-gray-primary/10 rounded-md ${hasInfo ? 'cursor-pointer' : 'cursor-default'}`}
                                                         style={{
                                                             backgroundColor: flowState ? `${flowState.color}` : undefined,
                                                             color: flowState ? flowState.textColor : undefined,
                                                             border: (flowState || isPeriodDay) ? '2px solid rgba(0,0,0,0.3)' : undefined,
-
                                                         }}
                                                     >
                                                         {date.getDate()}
                                                     </div>
 
-                                                    {/* Tooltip */}
-                                                    {(flowState || isPeriodDay) && (
-                                                        <div className="absolute bottom-full mb-2 hidden group-hover:flex bg-gray-900 text-white text-xs rounded-lg px-3 py-1.5 whitespace-nowrap z-10">
-                                                            {(flowState && isPeriodDay) ? `Day ${periodDayNumber} with ${flowState.label} Flow` : isPeriodDay ? `Day ${periodDayNumber}` : flowState ? `${flowState.label} Flow` : ''}
+                                                    {/* Tooltip - shows on hover OR when clicked */}
+                                                    {hasInfo && (
+                                                        <div className={`absolute bottom-full mb-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-1.5 whitespace-nowrap z-10 pointer-events-none transition-opacity ${isSelected ? 'flex opacity-100' : 'hidden group-hover:flex'
+                                                            }`}>
+                                                            {(flowState && isPeriodDay)
+                                                                ? `Day ${periodDayNumber} with ${flowState.label} Flow`
+                                                                : isPeriodDay
+                                                                    ? `Day ${periodDayNumber}`
+                                                                    : flowState
+                                                                        ? `${flowState.label} Flow`
+                                                                        : ''}
+
+                                                            {/* Small arrow pointing down */}
+                                                            <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
+                                                                <div className="border-4 border-transparent border-t-gray-900" />
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
                                             );
-                                        },
+                                        }
                                     }}
                                 />
                             </div>
@@ -829,7 +849,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                 className="flex justify-between items-center p-4 bg-linear-to-r from-pink-50 to-purple-50 rounded-xl border-2 border-pink-100 hover:shadow-md transition-all group"
                                             >
                                                 <div>
-                                                    <p className="font-semibold text-sm text-gray-800">
+                                                    <p className="font-semibold text-sm text-gray-800 flex items-center">
                                                         {formatDate(period.startDate)} → {period.endDate ? formatDate(period.endDate) : "Ongoing"}
                                                     </p>
                                                     <p className="text-xs text-gray-600 mt-1">

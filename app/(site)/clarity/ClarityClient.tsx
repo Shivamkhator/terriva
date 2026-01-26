@@ -333,7 +333,7 @@ export default function ClarityPage({ user }: ClarityClientProps) {
                             <Button
                                 onClick={handleAsk}
                                 disabled={loading || questionCount >= MAX_QUESTIONS}
-                                className="h-12 px-6 bg-primary/90 text-white flex items-center gap-2 active:scale-95 transition rounded-md"
+                                className="h-12 px-8 bg-primary/90 text-white flex items-center gap-2 active:scale-95 hover:scale-120 transition rounded-md"
                             >
                                 <Brain className="h-4 w-4" />
                                 {loading ? "Thinking..." : "Ask"}

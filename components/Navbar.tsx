@@ -6,7 +6,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession, signIn, signOut } from "next-auth/react"
-import { Brain } from "lucide-react"
+import { Brain, ChartAreaIcon } from "lucide-react"
 import { clearLockState } from "@/lib/passkeyLock";
 import { usePWAInstall } from "@/hooks/usePWAInstall"
 import {
@@ -107,6 +107,7 @@ export default function Navbar() {
   const navItems: NavItem[] = [
     { id: 'home', path: '/', label: 'Home', icon: icons.home },
     { id: 'dashboard', path: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
+    { id: 'insights', path: '/insights', label: 'Insights', icon: <ChartAreaIcon /> },
     { id: 'clarity', path: '/clarity', label: 'Clarity', icon: <Brain /> },
     { id: 'logout', path: "", label: 'Logout', icon: icons.logoutIcon, onClick: () => { clearLockState(); signOut(); } },
   ];
