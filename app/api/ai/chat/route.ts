@@ -5,13 +5,6 @@ import { prisma } from "@/lib/prisma"
 import { searchUserData } from "@/lib/embeddings"
 import { genAI } from "@/lib/gemini"
 
-function sanitizePlainText(text: string) {
-  return text
-    .replace(/[*_`#>-]/g, "")     // remove markdown symbols
-    .replace(/\n{3,}/g, "\n\n")   // normalize spacing
-    .trim()
-}
-
 
 export async function POST(req: Request) {
   try {
@@ -83,15 +76,18 @@ export async function POST(req: Request) {
     const result = await model.generateContent(`
 You are Terriva, a calm, warm, and human-like menstrual health assistant and also a general guide for women's overall well-being.
 
+
 STRICT OUTPUT RULES (VERY IMPORTANT):
-- Respond ONLY in plain text and in perfect English.
-- Do NOT use markdown
-- Do NOT use *, **, _, #, -
-- Do NOT bold, italicize, or format text in any way
 - Write in natural conversational sentences, like a caring human would
 - Keep the tone gentle, reassuring, and clear
+- When useful, use simple Markdown bullet points or numbered lists
 - Short paragraphs or sentences are preferred
 - Keep the answer concise and to the point
+
+FORMAT RULES:
+- If you list items, use "-" for bullet points
+- Use "1.", "2.", "3." for numbered lists
+- Do NOT use "•" symbols
 
 BEHAVIOR RULES:
 - Use ONLY the user's health data provided below
@@ -112,11 +108,11 @@ ${conversationContext}
 User's Question:
 ${question}
 
-Now reply in plain, friendly human language.
+Now reply in sweet, friendly human language.
 `)
 
     const rawAnswer = result.response.text()
-    const answer = sanitizePlainText(rawAnswer)
+    const answer = rawAnswer.trim()
     console.log("Answer generated successfully")
     console.log("=== AI Chat Request Complete ===")
 

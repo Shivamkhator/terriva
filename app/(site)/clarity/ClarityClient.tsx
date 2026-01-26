@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -11,6 +12,7 @@ import { ChevronRightIcon, Brain, RotateCcw, AlertCircle } from "lucide-react"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { Session } from "next-auth"
+import { text } from "stream/consumers";
 
 type ClarityClientProps = {
     user: Session["user"];
@@ -236,9 +238,31 @@ export default function ClarityPage({ user }: ClarityClientProps) {
                                                 <p className="text-xs font-semibold text-muted-foreground mb-1">
                                                     {msg.role === 'user' ? 'You' : 'Terriva'} • {msg.time}
                                                 </p>
-                                                <p className={`text-sm leading-relaxed whitespace-pre-wrap ${msg.role === "user" ? "text-primary" : "text-gray-800"}`}>
-                                                    {msg.content}
-                                                </p>
+                                                <div
+                                                    className={`
+    prose prose-sm max-w-none
+    ${msg.role === "user" ? "text-primary" : "text-gray-800"}
+  `}
+                                                >
+                                                    <ReactMarkdown
+                                                        components={{
+                                                            p: ({ node, ...props }) => <p className="my-1" {...props} />,
+                                                            ul: ({ node, ...props }) => (
+                                                                <ul className="list-disc pl-4 my-1" {...props} />
+                                                            ),
+                                                            ol: ({ node, ...props }) => (
+                                                                <ol className="list-decimal pl-4 my-1" {...props} />
+                                                            ),
+                                                            li: ({ node, ...props }) => <li className="my-0" {...props} />,
+                                                        }}
+                                                    >
+                                                        {msg.content}
+                                                    </ReactMarkdown>
+                                                </div>
+
+
+
+
                                             </div>
                                         </div>
                                     </CardContent>
