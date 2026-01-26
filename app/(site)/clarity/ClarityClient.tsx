@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -8,6 +8,7 @@ import {
     CardContent,
 } from "@/components/ui/card"
 import { ChevronRightIcon, Brain, RotateCcw, AlertCircle } from "lucide-react"
+import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { Session } from "next-auth"
 
@@ -18,6 +19,7 @@ type ClarityClientProps = {
 type Message = {
     role: "user" | "assistant";
     content: string;
+    time?: string;
 };
 
 const MAX_QUESTIONS = 5;
@@ -31,6 +33,13 @@ export default function ClarityPage({ user }: ClarityClientProps) {
     const [questionCount, setQuestionCount] = useState(0);
 
     const router = useRouter()
+
+    const bottomRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [conversationHistory, loading]);
+
 
     useEffect(() => {
         let isMounted = true;
@@ -74,26 +83,29 @@ export default function ClarityPage({ user }: ClarityClientProps) {
 
             const data = await res.json()
             if (data.limitReached) {
+
+
                 setConversationHistory(prev => [
                     ...prev,
-                    { role: 'user', content: currentQuestion },
+                    { role: 'user', content: currentQuestion, },
                     { role: 'assistant', content: "You've reached the maximum of 5 questions. Please start a new conversation." }
                 ]);
                 return;
             }
+            const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
             // Add both user question and assistant answer to history
             setConversationHistory(prev => [
                 ...prev,
-                { role: 'user', content: currentQuestion },
-                { role: 'assistant', content: data.answer }
+                { role: 'user', content: currentQuestion, time: now },
+                { role: 'assistant', content: data.answer, time: now }
             ]);
             setQuestionCount(prev => prev + 1);
 
         } catch {
             setConversationHistory(prev => [
                 ...prev,
-                { role: 'user', content: currentQuestion },
+                { role: 'user', content: currentQuestion, },
                 { role: 'assistant', content: "Sorry, I couldn't process your question. Please try again." }
             ]);
         } finally {
@@ -162,11 +174,11 @@ export default function ClarityPage({ user }: ClarityClientProps) {
     }
 
     return (
-        <div className="mx-auto min-h-screen max-w-5xl px-4 py-4 md:py-8 space-y-6 mb-20 flex flex-col">
+        <div className="mx-auto min-h-screen max-w-5xl px-4 py-4 md:py-8 flex flex-col gap-2 mb-20">
 
             {/* Header */}
             <div>
-                <div className="relative overflow-hidden rounded-2xl bg-primary p-6 md:p-8 text-white">
+                <div className="relative overflow-hidden rounded-2xl bg-primary p-8 text-white mb-4">
                     <div className="pointer-events-none absolute -top-1/2 -right-[10%] h-[200px] w-[300px] rounded-full bg-white/10"></div>
                     <div className="pointer-events-none absolute -bottom-[30%] -left-[5%] h-[200px] w-[200px] rounded-full bg-white/10"></div>
 
@@ -194,48 +206,65 @@ export default function ClarityPage({ user }: ClarityClientProps) {
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
+            <div className="flex-1 pb-4 space-y-4">
 
                 {/* Conversation History */}
                 {conversationHistory.length > 0 && (
                     <>
                         {conversationHistory.map((msg, idx) => (
-                            <Card key={idx} className={`${msg.role === 'user' ? 'bg-primary/5' : 'bg-white/70'} backdrop-blur-xs rounded-2xl ${msg.role === 'user' ? 'ml-auto max-w-[80%]' : 'mr-auto max-w-[90%]'}`}>
-                                <CardContent className={`p-4 md:p-6`}>
-                                    <div className="flex items-start gap-3">
-                                        <div className="flex-1">
-                                            <p className="text-xs font-semibold text-muted-foreground mb-1">
-                                                {msg.role === 'user' ? 'You' : 'Terriva'}
-                                            </p>
-                                            <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                                                {msg.content}
-                                            </p>
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.2 }}
+                            >
+
+                                <Card
+                                    key={idx}
+                                    className={`
+    rounded-2xl border
+    ${msg.role === "user"
+                                            ? "ml-auto bg-primary/15 border-primary/30 shadow-sm"
+                                            : "mr-auto bg-white/80 border-gray-200 shadow"}
+    max-w-[85%]
+  `}
+                                >
+
+                                    <CardContent className={`p-4 md:p-6`}>
+                                        <div className="flex items-start gap-3">
+                                            <div className="flex-1">
+                                                <p className="text-xs font-semibold text-muted-foreground mb-1">
+                                                    {msg.role === 'user' ? 'You' : 'Terriva'} • {msg.time}
+                                                </p>
+                                                <p className={`text-sm leading-relaxed whitespace-pre-wrap ${msg.role === "user" ? "text-primary" : "text-gray-800"}`}>
+                                                    {msg.content}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+
                         ))}
+                        <div ref={bottomRef} />
+
                     </>
                 )}
 
 
-                {/* Empty State */}
-                {conversationHistory.length === 0 && !loading && (
-                    <Card className="bg-white/70 backdrop-blur-xl rounded-2xl">
-                        <div className="text-center text-sm text-muted-foreground py-6">
-                            Ask questions to see the magic of Terriva
-                        </div>
-                    </Card>
-                )}
-
                 {/* Loading State */}
                 {loading && (
-                    <Card className="bg-white/70 backdrop-blur-xl rounded-2xl">
-                        <div className="flex items-center justify-center py-6">
-                            <video src="/Loader.webm" className="w-12 h-12" autoPlay loop muted />
-                        </div>
-                    </Card>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="mr-auto bg-white/80 border border-gray-200 rounded-2xl px-4 py-3 w-fit shadow"
+                    >
+                        <p className="text-sm text-gray-700">
+                            Terriva is typing<span className="animate-pulse">...</span>
+                        </p>
+                    </motion.div>
                 )}
+
 
 
                 {/* Chat Card */}
@@ -254,9 +283,9 @@ export default function ClarityPage({ user }: ClarityClientProps) {
                             {conversationHistory.length > 0 && (
                                 <Button
                                     onClick={handleReset}
-                                    variant="outline"
+                                    variant="ghost"
+                                    className="text-red-500 hover:bg-red-50 flex items-center gap-2"
                                     size="sm"
-                                    className="flex items-center gap-2"
                                 >
                                     <RotateCcw className="h-4 w-4" />
                                     New Conversation
@@ -267,20 +296,20 @@ export default function ClarityPage({ user }: ClarityClientProps) {
 
 
                         {/* Input */}
-                        <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex flex-col sm:flex-row gap-3 bg-white/70 p-3 rounded-xl border border-gray-200">
                             <Input
                                 placeholder="Ask anything to Terriva..."
                                 value={question}
                                 disabled={loading || questionCount >= MAX_QUESTIONS}
                                 onChange={(e) => setQuestion(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && handleAsk()}
-                                className="h-12"
+                                className="h-12 bg-transparent border-none shadow-none focus-visible:ring-0"
                             />
 
                             <Button
                                 onClick={handleAsk}
                                 disabled={loading || questionCount >= MAX_QUESTIONS}
-                                className="h-12 px-6 bg-primary/90 text-white flex items-center gap-2"
+                                className="h-12 px-6 bg-primary/90 text-white flex items-center gap-2 active:scale-95 transition rounded-md"
                             >
                                 <Brain className="h-4 w-4" />
                                 {loading ? "Thinking..." : "Ask"}

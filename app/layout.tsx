@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import "./globals.css";
 import { Noto_Serif } from "next/font/google"
@@ -50,6 +51,12 @@ export default function RootLayout({
         <SessionProviderWrapper>
           {children}
         </SessionProviderWrapper>
+        <Toaster
+          position="top-center"
+          swipeDirections={['left','right']}
+          offset={{ top: 72 }}
+          richColors
+        />
       </body>
     </html>
   );

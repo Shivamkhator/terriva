@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
-    CardDescription,
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
@@ -28,6 +27,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { type DateRange } from "react-day-picker";
 import { useRouter } from "next/navigation";
 import { Session } from "next-auth";
+import { toast } from "sonner"
 
 type DashboardClientProps = {
     user: Session["user"];
@@ -92,6 +92,10 @@ export default function DashboardClient({ user }: DashboardClientProps) {
         () => (Math.random() > 0.5 ? "Namaste" : "Konnichiwa"),
         []
     );
+
+    const [savingFlow, setSavingFlow] = useState(false);
+    const [savingPeriod, setSavingPeriod] = useState(false);
+
 
 
     const today = React.useMemo(() => {
@@ -212,6 +216,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     // Handle flow logging
     const handleLogFlow = async () => {
         if (!flowDate) return;
+        setSavingFlow(true);
         const dateStr = flowDate.toISOString().split('T')[0];
 
         try {
@@ -232,18 +237,24 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                 }
                 setDailyFlows(newFlows);
                 setFlow(1);
+                toast.success('Flow saved successfully');
             } else {
                 console.error('Failed to save flow');
+                toast.error('Failed to save flow');
             }
         } catch (error) {
             console.error('Error saving flow:', error);
+                toast.error("Something went wrong saving flow");
+
+        } finally {
+            setSavingFlow(false);
         }
     };
 
     // Handle period tracking
     const handleSavePeriod = async () => {
         if (!dateRange.from) return;
-
+        setSavingPeriod(true);
         try {
             const response = await fetch('/api/periods', {
                 method: 'POST',
@@ -270,11 +281,16 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                     dailyFlows: periodFlows,
                 }]);
                 resetPeriodForm();
+                toast.success('Period saved successfully');
             } else {
                 console.error('Failed to save period');
-            }
-        } catch (error) {
+                toast.error('Failed to save period');
+        }} catch (error) {
             console.error('Error saving period:', error);
+                toast.error("Something went wrong saving period");
+
+        } finally {
+            setSavingPeriod(false);
         }
     };
 
@@ -297,6 +313,8 @@ export default function DashboardClient({ user }: DashboardClientProps) {
             }
         } catch (error) {
             console.error('Error deleting period:', error);
+        } finally {
+            setSavingPeriod(false);
         }
     };
 
@@ -452,7 +470,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                             id="flow-date"
                                                             className="w-full justify-between font-normal h-12 border-2 hover:border-pink-300"
                                                         >
-                                                            <span className="text-sm">{flowDate? formatDate(flowDate): "Select Date"}</span>
+                                                            <span className="text-sm">{flowDate ? formatDate(flowDate) : "Select Date"}</span>
                                                             <ChevronDown className="ml-2 h-4 w-4 shrink-0 text-pink-500" />
                                                         </Button>
                                                     </PopoverTrigger>
@@ -469,7 +487,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                                 return d > today;
                                                             }}
                                                             onSelect={(date) => {
-                                                                   if (date) {
+                                                                if (date) {
                                                                     const d = new Date(date);
                                                                     d.setHours(0, 0, 0, 0);
                                                                     setFlowDate(d);
@@ -518,9 +536,18 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
                                             <Button
                                                 onClick={handleLogFlow}
-                                                className="w-full h-12 bg-primary text-white"
+                                                disabled={!flowDate || savingFlow}
+                                                className="w-full h-12 bg-primary text-white "
                                             >
-                                                <Save className="h-4 w-4 mr-2" /> Save Flow
+                                                {savingFlow ? (
+                                                    <span className="flex items-center gap-2">
+                                                        <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                                                        Saving...
+                                                    </span>
+                                                ) : (
+                                                    <>
+                                                        <Save className="h-4 w-4 mr-2" /> Save Flow
+                                                    </>)}
                                             </Button>
                                         </div>
                                     </div>
@@ -651,12 +678,22 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                             )}
 
                                             <Button
-                                                onClick={handleSavePeriod}
-                                                disabled={!dateRange.from || (hasEnded && !dateRange.to) || (hasEnded && dateRange.to! < dateRange.from!)}
-                                                className="w-full h-12 bg-primary text-white mb-4"
-                                            >
-                                                <CalendarIcon className="h-4 w-4 mr-2" /> Save Period
-                                            </Button>
+  onClick={handleSavePeriod}
+  disabled={!dateRange.from || savingPeriod}
+  className="w-full h-12 bg-primary text-white mb-4"
+>
+  {savingPeriod ? (
+    <span className="flex items-center gap-2">
+      <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+      Saving...
+    </span>
+  ) : (
+    <>
+      <CalendarIcon className="h-4 w-4 mr-2" /> Save Period
+    </>
+  )}
+</Button>
+
                                         </div>
                                     </div>
                                 </CardContent>
