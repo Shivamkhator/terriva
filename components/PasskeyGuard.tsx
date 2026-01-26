@@ -16,9 +16,14 @@ export function PasskeyGuard({ children }: PasskeyGuardProps) {
     const [unlocked, setUnlocked] = useState(false)
 
     const router = useRouter()
+    const isDev = process.env.NODE_ENV === "development"
     const state = getLockState()
     const expired = state && Date.now() - state.unlockedAt > TIMEOUT
     useEffect(() => {
+        if (isDev) {
+            setUnlocked(true)
+            return
+        }
         if (state && state.isUnlocked && !expired) {
             setUnlocked(true)
         } else {

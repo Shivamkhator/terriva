@@ -68,6 +68,8 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     const [savingEmailPref, setSavingEmailPref] = React.useState(false);
     const [flowDate, setFlowDate] = React.useState<Date | undefined>(undefined);
     const [flow, setFlow] = useState(1);
+    const [openFlowDate, setOpenFlowDate] = React.useState(false);
+
 
     const router = useRouter();
 
@@ -209,7 +211,8 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
     // Handle flow logging
     const handleLogFlow = async () => {
-        const dateStr = today.toISOString().split('T')[0];
+        if (!flowDate) return;
+        const dateStr = flowDate.toISOString().split('T')[0];
 
         try {
             const response = await fetch('/api/flows', {
@@ -310,6 +313,21 @@ export default function DashboardClient({ user }: DashboardClientProps) {
         ) + 1;
     }
 
+    // Get current flow for selected date
+    const currentFlowForDate = React.useMemo(() => {
+        if (!flowDate) return null;
+        const dateStr = flowDate.toISOString().split('T')[0];
+        return dailyFlows.find(f => f.date === dateStr);
+    }, [flowDate, dailyFlows]);
+
+    // Update flow slider when date changes
+    useEffect(() => {
+        if (currentFlowForDate) {
+            setFlow(currentFlowForDate.intensity);
+        } else {
+            setFlow(1);
+        }
+    }, [currentFlowForDate]);
 
     return (
         <div className="min-h-screen">
@@ -422,11 +440,45 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                         <div className="space-y-4">
                                             <div className="text-center py-2">
                                                 <p className="text-sm pt-2 text-muted-foreground">
-                                                    Logging flow for
+                                                    {flowDate ? `Logging flow for ${formatDate(flowDate)}` : 'Select a date to log flow'}
                                                 </p>
-                                                <p className=" text-muted-foreground mt-1 italic font-semibold">
-                                                    {formatDate(today)}
-                                                </p>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Popover open={openFlowDate} onOpenChange={setOpenFlowDate}>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            id="flow-date"
+                                                            className="w-full justify-between font-normal h-12 border-2 hover:border-pink-300"
+                                                        >
+                                                            <span className="text-sm">{flowDate? formatDate(flowDate): "Select Date"}</span>
+                                                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 text-pink-500" />
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                                                        <Calendar
+                                                            mode="single"
+                                                            selected={flowDate}
+                                                            defaultMonth={flowDate ?? today}
+                                                            captionLayout="dropdown"
+                                                            className="rounded-lg border-0 w-[16rem]"
+                                                            disabled={(date) => {
+                                                                const d = new Date(date);
+                                                                d.setHours(0, 0, 0, 0);
+                                                                return d > today;
+                                                            }}
+                                                            onSelect={(date) => {
+                                                                   if (date) {
+                                                                    const d = new Date(date);
+                                                                    d.setHours(0, 0, 0, 0);
+                                                                    setFlowDate(d);
+                                                                    setOpenFlowDate(false);
+                                                                }
+                                                            }}
+                                                        />
+                                                    </PopoverContent>
+                                                </Popover>
                                             </div>
 
                                             <div className="space-y-3">
@@ -468,7 +520,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                 onClick={handleLogFlow}
                                                 className="w-full h-12 bg-primary text-white"
                                             >
-                                                <Save className="h-4 w-4 mr-2" /> Save Today's Flow
+                                                <Save className="h-4 w-4 mr-2" /> Save Flow
                                             </Button>
                                         </div>
                                     </div>
