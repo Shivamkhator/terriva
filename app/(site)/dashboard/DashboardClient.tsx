@@ -244,7 +244,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
             }
         } catch (error) {
             console.error('Error saving flow:', error);
-                toast.error("Something went wrong saving flow");
+            toast.error("Something went wrong saving flow");
 
         } finally {
             setSavingFlow(false);
@@ -285,9 +285,10 @@ export default function DashboardClient({ user }: DashboardClientProps) {
             } else {
                 console.error('Failed to save period');
                 toast.error('Failed to save period');
-        }} catch (error) {
+            }
+        } catch (error) {
             console.error('Error saving period:', error);
-                toast.error("Something went wrong saving period");
+            toast.error("Something went wrong saving period");
 
         } finally {
             setSavingPeriod(false);
@@ -615,10 +616,12 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                         }}
                                                         className="border-pink-400 data-[state=checked]:bg-primary"
                                                     />
+
                                                     <Label htmlFor="has-ended" className="text-sm font-medium cursor-pointer">
                                                         My period has ended
                                                     </Label>
                                                 </div>
+
 
                                                 {hasEnded && (
                                                     <div className="space-y-2">
@@ -678,21 +681,21 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                             )}
 
                                             <Button
-  onClick={handleSavePeriod}
-  disabled={!dateRange.from || savingPeriod}
-  className="w-full h-12 bg-primary text-white mb-4"
->
-  {savingPeriod ? (
-    <span className="flex items-center gap-2">
-      <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-      Saving...
-    </span>
-  ) : (
-    <>
-      <CalendarIcon className="h-4 w-4 mr-2" /> Save Period
-    </>
-  )}
-</Button>
+                                                onClick={handleSavePeriod}
+                                                disabled={!dateRange.from || savingPeriod}
+                                                className="w-full h-12 bg-primary text-white mb-4"
+                                            >
+                                                {savingPeriod ? (
+                                                    <span className="flex items-center gap-2">
+                                                        <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                                                        Saving...
+                                                    </span>
+                                                ) : (
+                                                    <>
+                                                        <CalendarIcon className="h-4 w-4 mr-2" /> Save Period
+                                                    </>
+                                                )}
+                                            </Button>
 
                                         </div>
                                     </div>
