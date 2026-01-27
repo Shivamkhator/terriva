@@ -4,21 +4,21 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { searchUserData } from "@/lib/embeddings"
 import { genAI } from "@/lib/gemini"
+import { hashEmail } from "@/lib/crypto"
 
 
 export async function POST(req: Request) {
   try {
-    console.log("=== AI Chat Request Started ===")
 
     const session = await getServerSession(authOptions)
-    console.log("Session:", session?.user?.email)
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { emailHash: hashEmail(session.user.email!),
+ },
     })
 
     if (!user) {
@@ -26,9 +26,7 @@ export async function POST(req: Request) {
     }
 
     const { question, conversationHistory } = await req.json()
-    console.log("Question:", question)
-    console.log("Conversation History Length:", conversationHistory?.length || 0)
-
+      
     if (!question || typeof question !== "string") {
       return NextResponse.json({ error: "Invalid question" }, { status: 400 })
     }
@@ -41,15 +39,12 @@ export async function POST(req: Request) {
     }
 
     // Search for relevant data
-    console.log("Searching user data...")
     const results = await searchUserData(user.id, question, 7)
-    console.log("Found results:", results.length)
 
     const context = results.length > 0
       ? results.map(r => `- ${r.content} (${r.source})`).join("\n")
       : "No relevant data found."
 
-    console.log("Context:", context)
 
     if (results.length === 0) {
       return NextResponse.json({
@@ -68,7 +63,6 @@ export async function POST(req: Request) {
     }
 
     // Generate answer with Gemini 2.5 Flash
-    console.log("Calling Gemini API...")
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash"
     })
@@ -113,8 +107,6 @@ Now reply in sweet, friendly human language.
 
     const rawAnswer = result.response.text()
     const answer = rawAnswer.trim()
-    console.log("Answer generated successfully")
-    console.log("=== AI Chat Request Complete ===")
 
     return NextResponse.json({
       answer,

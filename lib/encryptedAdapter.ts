@@ -88,7 +88,7 @@ export function EncryptedPrismaAdapter(): Adapter {
     async createVerificationToken(token: VerificationToken) {
       await prisma.verificationToken.create({
         data: {
-          identifierEnc: encrypt(token.identifier),
+          identifierHash: hashEmail(token.identifier),
           token: token.token,
           expires: token.expires,
         },
@@ -98,12 +98,10 @@ export function EncryptedPrismaAdapter(): Adapter {
     },
 
     async useVerificationToken(params) {
-      const encryptedId = encrypt(params.identifier);
-
       const token = await prisma.verificationToken.findUnique({
         where: {
-          identifierEnc_token: {
-            identifierEnc: encryptedId,
+          identifierHash_token: {
+            identifierHash: hashEmail(params.identifier),
             token: params.token,
           },
         },
@@ -113,8 +111,8 @@ export function EncryptedPrismaAdapter(): Adapter {
 
       await prisma.verificationToken.delete({
         where: {
-          identifierEnc_token: {
-            identifierEnc: encryptedId,
+          identifierHash_token: {
+            identifierHash: hashEmail(params.identifier),
             token: params.token,
           },
         },
@@ -134,7 +132,7 @@ export function EncryptedPrismaAdapter(): Adapter {
           userId: account.userId,
           type: account.type,
           provider: account.provider,
-          providerAccountIdEnc: encrypt(account.providerAccountId),
+          providerAccountIdHash: hashEmail(account.providerAccountId),
           refresh_token: account.refresh_token,
           access_token: account.access_token,
           expires_at: account.expires_at,
@@ -153,9 +151,9 @@ export function EncryptedPrismaAdapter(): Adapter {
     async getUserByAccount({ provider, providerAccountId }) {
       const account = await prisma.account.findUnique({
         where: {
-          provider_providerAccountIdEnc: {
+          provider_providerAccountIdHash: {
             provider,
-            providerAccountIdEnc: encrypt(providerAccountId),
+            providerAccountIdHash: hashEmail(providerAccountId),
           },
         },
         include: { user: true },

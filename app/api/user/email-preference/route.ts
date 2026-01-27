@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
+import { hashEmail } from "@/lib/crypto";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -13,7 +14,8 @@ export async function POST(req: Request) {
   const { enabled } = await req.json();
 
   await prisma.user.update({
-    where: { email: session.user.email },
+    where: { emailHash: hashEmail(session.user.email!),
+ },
     data: { emailNotifications: enabled },
   });
 

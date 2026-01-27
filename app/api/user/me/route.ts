@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/lib/auth";
+import { hashEmail } from "@/lib/crypto";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -10,7 +11,8 @@ export async function GET() {
   }
 
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { emailHash: hashEmail(session.user.email!),
+ },
     select: { emailNotifications: true },
   });
 

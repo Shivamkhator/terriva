@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { generateRegistrationOptions } from "@simplewebauthn/server"
 import { rpID, rpName } from "@/lib/webauthn"
 import { prisma } from "@/lib/prisma"
+import { hashEmail } from "@/lib/crypto"
 
 export async function POST() {
   try {
@@ -20,7 +21,7 @@ export async function POST() {
       rpName,
       rpID,
       userID: new TextEncoder().encode(session.user.id),
-      userName: session.user.email || session.user.id,
+      userName: session.user.email ? hashEmail(session.user.email) : session.user.id,
       timeout: 60000,
       attestationType: "none",
       authenticatorSelection: {

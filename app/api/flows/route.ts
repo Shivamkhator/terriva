@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { embedDailyFlow } from "@/lib/embeddings"
+import { hashEmail } from "@/lib/crypto";
 
 // GET all flows for current user
 export async function GET(req: NextRequest) {
@@ -13,7 +14,8 @@ export async function GET(req: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { emailHash: hashEmail(session.user.email!),
+ },
     });
 
     if (!user) {
@@ -41,7 +43,8 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { emailHash: hashEmail(session.user.email!),
+ },
     });
 
     if (!user) {
