@@ -3,11 +3,11 @@ import { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import nodemailer from "nodemailer";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { EncryptedPrismaAdapter } from "./encryptedAdapter";
 import { prisma } from "@/lib/prisma";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma as any),
+  adapter: EncryptedPrismaAdapter(),
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development", 
   useSecureCookies: process.env.NODE_ENV === "production",
