@@ -112,7 +112,7 @@ model Embedding {
   source    String   // period | flow | insight
   sourceId  String
   content   String
-  vector    Unsupported("vector(768)")
+  vector    Unsupported("vector(3072)")
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
