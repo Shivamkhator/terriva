@@ -5,7 +5,7 @@ import type { Period, DailyFlow } from "@prisma/client"
 import { genAI } from "./gemini"
 
 export async function createEmbedding(text: string): Promise<number[]> {
-  const model = genAI.getGenerativeModel({ model: "text-embedding-004" })
+  const model = genAI.getGenerativeModel({ model: "gemini-embedding-001" })
   const result = await model.embedContent(text)
   return result.embedding.values
 }
