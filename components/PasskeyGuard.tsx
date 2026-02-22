@@ -4,7 +4,6 @@ import { useEffect, useState, ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import { getLockState, setLockState } from "@/lib/passkeyLock"
 import { UnlockScreen } from "@/components/UnlockScreen"
-import { startAuthentication } from "@simplewebauthn/browser"
 
 type PasskeyGuardProps = {
     children: ReactNode
@@ -14,51 +13,39 @@ const TIMEOUT = 5 * 60 * 1000 // 5 minutes
 
 export function PasskeyGuard({ children }: PasskeyGuardProps) {
     const [unlocked, setUnlocked] = useState(false)
-
+    const [isChecking, setIsChecking] = useState(true)
     const router = useRouter()
-    const isDev = process.env.NODE_ENV === "development"
-    const state = getLockState()
-    const expired = state && Date.now() - state.unlockedAt > TIMEOUT
+
     useEffect(() => {
-        if (isDev) {
-            setUnlocked(true)
-            return
-        }
-        if (state && state.isUnlocked && !expired) {
-            setUnlocked(true)
-        } else {
-        }
+        checkLockState()
     }, [])
 
-    async function requirePasskey() {
-        try {
-            const res = await fetch("/api/passkey/check")
-            const { hasPasskey } = await res.json()
+    function checkLockState() {
+        const state = getLockState()
+        const isExpired = state && Date.now() - state.unlockedAt > TIMEOUT
 
-            if (!hasPasskey) {
-                return
+        if (state?.isUnlocked && !isExpired) {
+            setUnlocked(true)
+            setIsChecking(false)
+        } else {
+            // Clear expired lock
+            if (isExpired) {
+                setLockState({ isUnlocked: false, unlockedAt: 0 })
             }
-
-            const optionsRes = await fetch("/api/passkey/auth/options", { method: "POST" })
-            const options = await optionsRes.json()
-
-            const assertion = await startAuthentication({ optionsJSON: options })
-
-            const verifyRes = await fetch("/api/passkey/auth/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(assertion)
-            })
-
-            if (verifyRes.ok) {
-                setLockState({ isUnlocked: true, unlockedAt: Date.now() })
-                setUnlocked(true)
-            }
-        } catch (err) {
-            console.error("Auto-unlock failed", err)
+            // Redirect to unlock screen instead of auto-prompting
+            setIsChecking(false)
         }
     }
 
+    if (isChecking) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <div className="text-center">
+                    <video src="/Loader.webm" className="mx-auto w-24 h-24" autoPlay loop muted />
+                </div>
+            </div>
+        )
+    }
 
     if (!unlocked) return <UnlockScreen />
 
