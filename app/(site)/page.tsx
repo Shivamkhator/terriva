@@ -97,7 +97,6 @@ export default function Terriva() {
 }
 const date = new Date();
 const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' };
-const dateString = date.toLocaleDateString(undefined, options);
 
 function HeroSection({ insights, session, loadingInsights, periods }: any) {
 
@@ -169,7 +168,7 @@ function HeroSection({ insights, session, loadingInsights, periods }: any) {
                         ? `Last period • ${formatDate(
                             getLastPeriod(periods)?.startDate
                         )}`
-                        : dateString}
+                        : formatDate(date)}
                 </div>
 
             </nav>
