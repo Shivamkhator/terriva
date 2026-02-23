@@ -97,7 +97,26 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     const [savingFlow, setSavingFlow] = useState(false);
     const [savingPeriod, setSavingPeriod] = useState(false);
 
+    const activePeriod = useMemo(() => {
+        return periods.find(p => !p.endDate) ?? null;
+    }, [periods]);
 
+    const activePeriodDay = useMemo(() => {
+        if (!activePeriod) return null;
+
+        const start = new Date(activePeriod.startDate);
+        const today = new Date();
+
+        start.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+
+        return (
+            Math.floor(
+                (today.getTime() - start.getTime()) /
+                (1000 * 60 * 60 * 24)
+            ) + 1
+        );
+    }, [activePeriod]);
 
     const today = React.useMemo(() => {
         const t = new Date();
@@ -368,14 +387,23 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                     </span>
                                 </div>
                                 <p className="opacity-70 text-sm flex items-center gap-1">
-                                    {insights ? (
-                                        <span>{(() => {
-                                            const days = calculateNextPeriodDays();
-                                            if (days === null) return "--";
-                                            if (days < 1) return "Your next period may start soon";
-                                            if (days === 1) return "Your next period is in 1 day";
-                                            return `Your next period is in ${days} days`;
-                                        })()}</span>) : ("Track more cycles to unlock personalized insights")}
+                                    {activePeriod ? (
+                                        <span>
+                                            You are on day {activePeriodDay} of your period
+                                        </span>
+                                    ) : insights ? (
+                                        <span>
+                                            {(() => {
+                                                const days = calculateNextPeriodDays();
+                                                if (days === null) return "--";
+                                                if (days < 1) return "Your next period may start soon";
+                                                if (days === 1) return "Your next period is in 1 day";
+                                                return `Your next period is in ${days} days`;
+                                            })()}
+                                        </span>
+                                    ) : (
+                                        "Track more cycles to unlock personalized insights"
+                                    )}
                                 </p>
                             </div>
 

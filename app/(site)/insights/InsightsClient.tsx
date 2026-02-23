@@ -7,6 +7,13 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from "next/navigation";
 import { ChevronRightIcon } from "lucide-react"
 import { Button } from '@/components/ui/button';
+import {
+    getLastPeriod,
+    getAveragePeriodLength,
+    getAverageCycleLength,
+    getNextPeriodDate,
+    getDaysUntilNextPeriod,
+} from "@/lib/cycleInsights";
 
 type CycleClientProps = {
     user: Session["user"];
@@ -73,6 +80,30 @@ export default function InsightsClient({ user }: CycleClientProps) {
             "Listening to your needs is important in this phase."
         ]
     };
+
+    const cycleStats = useMemo(() => {
+        const avgPeriodLength = getAveragePeriodLength(periods);
+        const avgCycleLength = getAverageCycleLength(periods);
+
+        const lastPeriod = getLastPeriod(periods);
+
+        const nextPeriodDate = getNextPeriodDate(
+            periods,
+            avgCycleLength
+        );
+
+        const daysUntilNext = getDaysUntilNextPeriod(
+            nextPeriodDate
+        );
+
+        return {
+            avgPeriodLength,
+            avgCycleLength,
+            lastPeriod,
+            nextPeriodDate,
+            daysUntilNext,
+        };
+    }, [periods]);
 
 
     useEffect(() => {
@@ -184,54 +215,30 @@ export default function InsightsClient({ user }: CycleClientProps) {
     }, [dailyFlows]);
 
     const { currentDay, totalDays } = useMemo(() => {
-        if (!periods.length) {
-            return { currentDay: 1, totalDays: insights?.avgCycleLength ?? 28 };
-        }
+  if (!cycleStats.lastPeriod) {
+    return {
+      currentDay: 1,
+      totalDays: cycleStats.avgCycleLength ?? 28,
+    };
+  }
 
-        const lastPeriod = periods
-            .slice()
-            .sort(
-                (a, b) =>
-                    new Date(b.startDate).getTime() -
-                    new Date(a.startDate).getTime()
-            )[0];
+  const start = new Date(cycleStats.lastPeriod.startDate);
+  start.setHours(0, 0, 0, 0);
 
-        const start = new Date(lastPeriod.startDate);
-        start.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+  const day =
+    Math.floor(
+      (today.getTime() - start.getTime()) /
+      (1000 * 60 * 60 * 24)
+    ) + 1;
 
-        const day =
-            Math.floor(
-                (today.getTime() - start.getTime()) /
-                (1000 * 60 * 60 * 24)
-            ) + 1;
-
-        return {
-            currentDay: day,
-            totalDays: insights?.avgCycleLength,
-        };
-    }, [periods, insights]);
-
-
-    function lastPeriod() {
-        return periods.length > 0 ? periods
-            .slice()
-            .sort(
-                (a, b) =>
-                    new Date(b.startDate).getTime() -
-                    new Date(a.startDate).getTime()
-            )[0] : null;
-    }
-
-
-    function calculateNextPeriodDays() {
-        if (!insights?.nextPeriodDate) return null;
-        const today = new Date();
-        const nextPeriod = new Date(insights.nextPeriodDate);
-        return daysBetween(today, nextPeriod);
-    }
+  return {
+    currentDay: day,
+    totalDays: cycleStats.avgCycleLength ?? 28,
+  };
+}, [cycleStats]);
 
     function todayKey() {
         return new Date().toISOString().split("T")[0]; // YYYY-MM-DD
@@ -285,10 +292,10 @@ export default function InsightsClient({ user }: CycleClientProps) {
 
         return getCyclePhase(
             currentDay,
-            insights.avgPeriodLength ?? 5,
-            insights.avgCycleLength ?? 28
+            cycleStats.avgPeriodLength ?? 5,
+            cycleStats.avgCycleLength ?? 28
         );
-    }, [currentDay, insights]);
+    }, [currentDay, cycleStats]);
 
     const dailySuggestion = useMemo(() => {
         if (typeof window === "undefined") return "";
@@ -364,13 +371,13 @@ export default function InsightsClient({ user }: CycleClientProps) {
     }, [periods]);
 
     const isFertile = useMemo(() => {
-        if (!insights) return null;
+        if (!cycleStats) return null;
 
         return isFertileToday(
             currentDay,
-            insights.avgCycleLength ?? 28
+            cycleStats.avgCycleLength ?? 28
         );
-    }, [currentDay, insights]);
+    }, [currentDay, cycleStats]);
 
 
     function getHealthWarnings({
@@ -424,16 +431,16 @@ export default function InsightsClient({ user }: CycleClientProps) {
     }
 
     const healthWarnings = useMemo(() => {
-        if (!insights) return [];
+        if (!cycleStats) return [];
 
         return getHealthWarnings({
-            avgPeriodLength: insights.avgPeriodLength,
-            avgCycleLength: insights.avgCycleLength,
+            avgPeriodLength: cycleStats.avgPeriodLength ?? 5,
+            avgCycleLength: cycleStats.avgCycleLength ?? 28,
             dailyFlows,
         });
-    }, [insights, dailyFlows]);
+    }, [cycleStats, dailyFlows]);
 
-    if (!insights) {
+    if (!cycleStats) {
         return (
             <div className="flex w-full max-w-5xl mx-auto flex-col gap-2 p-4 md:p-8">
 
@@ -587,18 +594,18 @@ export default function InsightsClient({ user }: CycleClientProps) {
 
                                     <div className=" p-3 rounded-xl">
                                         <p className="text-xs uppercase text-gray-400 font-bold">Last Period on</p>
-                                        <p className="font-semibold text-xl text-gray-700">{formatDate(lastPeriod()?.startDate) || "--"}</p>
+                                        <p className="font-semibold text-xl text-gray-700">{formatDate(cycleStats.lastPeriod?.startDate) || "--"}</p>
                                     </div>
                                     <div className=" p-3 rounded-xl">
                                         <p className="text-xs uppercase text-gray-400 font-bold">{(() => {
-                                                const days = calculateNextPeriodDays();
-                                                if (days === null) return "--";
-                                                if (days < 1) return "Next Period";
-                                                return "Next Period in";
-                                            })()}</p>
+                                            const days = cycleStats.daysUntilNext;
+                                            if (days === null) return "--";
+                                            if (days < 1) return "Next Period";
+                                            return "Next Period in";
+                                        })()}</p>
                                         <p className="font-semibold text-xl text-gray-700">
                                             {(() => {
-                                                const days = calculateNextPeriodDays();
+                                                const days = cycleStats.daysUntilNext;
                                                 if (days === null) return "--";
                                                 if (days < 1) return "May start soon";
                                                 if (days === 1) return "1 day";
@@ -608,11 +615,11 @@ export default function InsightsClient({ user }: CycleClientProps) {
                                     </div>
                                     <div className=" p-3 rounded-xl">
                                         <p className="text-xs uppercase text-gray-400 font-bold">Avg. Period Length</p>
-                                        <p className="font-semibold text-xl text-gray-700">{insights?.avgPeriodLength || "--"} Days</p>
+                                        <p className="font-semibold text-xl text-gray-700">{cycleStats.avgPeriodLength || "--"} Days</p>
                                     </div>
                                     <div className=" p-3 rounded-xl">
                                         <p className="text-xs uppercase text-gray-400 font-bold">Avg. Cycle Length</p>
-                                        <p className="font-semibold text-xl text-gray-700">{totalDays || "--"} Days</p>
+                                        <p className="font-semibold text-xl text-gray-700">{cycleStats.avgCycleLength || "--"} Days</p>
                                     </div>
 
                                 </div>
@@ -672,7 +679,7 @@ export default function InsightsClient({ user }: CycleClientProps) {
                                     <video src="/Loader.webm" className="mx-auto w-16 h-16" autoPlay loop muted />
                                 </div>
                             ) : (
-                            <LineChart data={monthlyPeriodData} />
+                                <LineChart data={monthlyPeriodData} />
                             )}
                         </div>
                         <div className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-2xl p-4 md:p-6 lg:col-span-7 lg:row-span-1">
@@ -683,7 +690,7 @@ export default function InsightsClient({ user }: CycleClientProps) {
                                     <video src="/Loader.webm" className="mx-auto w-16 h-16" autoPlay loop muted />
                                 </div>
                             ) : (
-                            <FlowChart data={monthlyFlowData} />
+                                <FlowChart data={monthlyFlowData} />
                             )}
                         </div>
                     </div>

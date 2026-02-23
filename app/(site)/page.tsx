@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef } from "react"
+import React, { useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
@@ -43,18 +43,53 @@ const features = [
     }
 ]
 
-export default function TerrivaHome() {
+export default function Terriva() {
     const containerRef = useRef<HTMLDivElement>(null)
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end end"],
     })
 
+    const { data: session } = useSession();
+
+    const [insights, setInsights] = React.useState<any | null>(null);
+    const [loadingInsights, setLoadingInsights] = React.useState(false);
+    const [periods, setPeriods] = React.useState<any[]>([]);
+
     const rotate = useTransform(scrollYProgress, [0, 1], [0, 120])
+
+    useEffect(() => {
+        if (!session) return;
+
+        const loadData = async () => {
+            setLoadingInsights(true);
+
+            try {
+                const [insRes, perRes] = await Promise.all([
+                    fetch("/api/insights"),
+                    fetch("/api/periods")
+                ]);
+                if (insRes.ok) {
+                    const data = await insRes.json();
+                    setInsights(data);
+                }
+                if (perRes.ok) {
+                    const data = await perRes.json();
+                    setPeriods(data);
+                }
+            } catch (e) {
+                console.error("Insights load failed", e);
+            } finally {
+                setLoadingInsights(false);
+            }
+        };
+
+        loadData();
+    }, [session]);
 
     return (
         <div ref={containerRef} className="relative bg-background text-foreground font-sans selection:bg-primary selection:text-white">
-            <HeroSection />
+            <HeroSection insights={insights} session={session} loadingInsights={loadingInsights} periods={periods} />
             <ScrollCarouselSection />
             <FooterSection />
         </div>
@@ -64,7 +99,55 @@ const date = new Date();
 const options: Intl.DateTimeFormatOptions = { month: 'long', day: 'numeric', year: 'numeric' };
 const dateString = date.toLocaleDateString(undefined, options);
 
-function HeroSection() {
+function HeroSection({ insights, session, loadingInsights, periods }: any) {
+
+    function daysUntilNext(date?: string | Date | null) {
+        if (!date) return null;
+
+        const today = new Date();
+        const next = new Date(date);
+
+        today.setHours(0, 0, 0, 0);
+        next.setHours(0, 0, 0, 0);
+
+        return Math.floor(
+            (next.getTime() - today.getTime()) /
+            (1000 * 60 * 60 * 24)
+        );
+    }
+    function getActivePeriod(periods: any[]) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        return periods.find((p) => {
+            const start = new Date(p.startDate);
+            start.setHours(0, 0, 0, 0);
+
+            if (p.endDate) return false; // ended periods not active
+
+            return start <= today;
+        });
+    }
+
+    function getLastPeriod(periods: any[]) {
+        if (!periods || periods.length === 0) return null;
+
+        return [...periods].sort(
+            (a, b) =>
+                new Date(b.startDate).getTime() -
+                new Date(a.startDate).getTime()
+        )[0];
+    }
+    function formatDate(date?: string | Date | null) {
+        if (!date) return "";
+
+        return new Date(date).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        });
+    }
+
     // --- Movement state ---
     const mode = "scroll";
 
@@ -76,13 +159,17 @@ function HeroSection() {
 
 
     return (
-        <section className="relative z-10 h-screen w-full flex flex-col justify-between p-4 md:p-12 border-b border-primary/10">
+        <section className="relative z-10 h-screen w-full flex flex-col justify-between p-4 border-b border-primary/10">
             <nav className="flex flex-col md:flex-row justify-between items-start uppercase tracking-widest text-sm md:text-md font-bold text-gray-primary/80">
                 <div>
                     Terriva by SkyBee
                 </div>
                 <div className="text-xs md:text-sm tracking-[0.3em] text-black italic" >
-                    {dateString}
+                    {session && periods.length > 0
+                        ? `Last period • ${formatDate(
+                            getLastPeriod(periods)?.startDate
+                        )}`
+                        : dateString}
                 </div>
 
             </nav>
@@ -93,8 +180,52 @@ function HeroSection() {
                 </h1>
                 <div className="flex flex-col md:flex-row justify-between items-end border-t border-primary/30 py-[4svh] ">
                     <p className="max-w-md text-xl text-gray-primary leading-relaxed">
-                        Your Insights, Only Yours. <br />
-                        <span className="opacity-85 text-sm">Scroll to sync.</span>
+                        {session ? (
+                            insights ? (
+                                (() => {
+                                    const active = getActivePeriod(periods || []);
+
+                                    // ⭐ ACTIVE PERIOD — highest priority
+                                    if (active) {
+                                        const start = new Date(active.startDate);
+                                        const today = new Date();
+                                        start.setHours(0, 0, 0, 0);
+                                        today.setHours(0, 0, 0, 0);
+
+                                        const day =
+                                            Math.floor(
+                                                (today.getTime() - start.getTime()) /
+                                                (1000 * 60 * 60 * 24)
+                                            ) + 1;
+
+                                        return `Day ${day} of your period`;
+                                    }
+
+                                    // ⭐ OTHERWISE → prediction
+                                    const days = daysUntilNext(insights.nextPeriodDate);
+
+                                    if (days === null) return "Keep tracking for predictions";
+
+                                    if (days < 0) return "Your period may be late";
+
+                                    if (days === 0) return "Your period may start today";
+
+                                    if (days === 1) return "Next period in 1 day";
+
+                                    return `Next period in ${days} days`;
+                                })()
+                            ) : loadingInsights ? (
+                                "Loading your cycle insights…"
+                            ) : (
+                                "Track more cycles to unlock predictions"
+                            )
+                        ) : (
+                            "Your Insights, Only Yours."
+                        )}
+                        <br />
+                        <span className="opacity-85 text-sm">
+                            Scroll to sync.
+                        </span>
                     </p>
                     <div className="animate-bounce mr-2">
                         <ArrowDown className="w-7 h-7 text-primary" />
