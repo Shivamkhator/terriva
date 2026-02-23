@@ -5,6 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
 import { ArrowDown, Activity, Calendar, Brain, Shield } from "lucide-react"
+import { AuroraText } from "@/components/ui/aurora-text"
 import { useSession } from "next-auth/react";
 import { PreviewCard, PreviewCardPanel, PreviewCardTrigger } from "@/components/animate-ui/components/base/preview-card";
 
@@ -174,8 +175,8 @@ function HeroSection({ insights, session, loadingInsights, periods }: any) {
             </nav>
 
             <div className="mt-auto mb-[6svh] md:mb-[4svh] mr-2 md:mr-6">
-                <h1 className="text-[22vw] md:text-[15vw] leading-[0.85] font-bold text-primary tracking-tighter uppercase mix-blend-darken pb-[8svh] md:pb-0">
-                    Clarity <span className="block italic font-serif font-light text-accent-foreground ml-[9vw]">Every</span> Month
+                <h1 className="text-[21vw] md:text-[15vw] leading-[0.85] font-bold text-primary tracking-tighter uppercase mix-blend-darken pb-[8svh] md:pb-0">
+                    Clarity <span className="italic font-serif font-light ml-[9vw]"><AuroraText colors={["#004D4D","#66B2B2"]}>Every&nbsp;</AuroraText></span> Month 
                 </h1>
                 <div className="flex flex-col md:flex-row justify-between items-end border-t border-primary/30 py-[4svh] ">
                     <p className="max-w-md text-xl text-gray-primary leading-relaxed">

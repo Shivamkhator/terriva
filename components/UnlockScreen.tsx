@@ -13,6 +13,7 @@ export function UnlockScreen() {
   const router = useRouter()
   const { data: session } = useSession()
   const autoVerifyAttempted = useRef(false)
+  
 
   useEffect(() => {
     const lock = JSON.parse(localStorage.getItem("passkeyLock") || "null")

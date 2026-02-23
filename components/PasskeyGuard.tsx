@@ -15,6 +15,8 @@ export function PasskeyGuard({ children }: PasskeyGuardProps) {
     const [unlocked, setUnlocked] = useState(false)
     const [isChecking, setIsChecking] = useState(true)
     const router = useRouter()
+    const isDev = process.env.NODE_ENV === "development"
+
 
     useEffect(() => {
         checkLockState()
@@ -23,6 +25,12 @@ export function PasskeyGuard({ children }: PasskeyGuardProps) {
     function checkLockState() {
         const state = getLockState()
         const isExpired = state && Date.now() - state.unlockedAt > TIMEOUT
+
+        if (isDev) {
+            setUnlocked(true)
+            setIsChecking(false)
+            return
+        }
 
         if (state?.isUnlocked && !isExpired) {
             setUnlocked(true)
