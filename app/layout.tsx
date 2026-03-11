@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
-import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import Providers from "@/components/Providers";
 import "./globals.css";
 import { Noto_Serif } from "next/font/google"
 import InstallPrompt from "@/components/InstallPrompt";
@@ -48,9 +48,9 @@ export default function RootLayout({
         className={notoSerif.className}
       >
         <InstallPrompt />
-        <SessionProviderWrapper>
+        <Providers attribute="class" defaultTheme="light">
           {children}
-        </SessionProviderWrapper>
+        </Providers>
         <Toaster
           position="top-center"
           swipeDirections={['left','right']}

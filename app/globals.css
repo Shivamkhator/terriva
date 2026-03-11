@@ -7,63 +7,125 @@
 /* -------- LIGHT THEME (DEFAULT) -------- */
 :root {
   /* Brand colors */
-  --action: #2F4F4F;         /* deep slate green */
-  --accent: #3B82F6;        /* blue accent */
-  --gray-primary: #5A5A5A;  /* secondary text gray */
+  --action: #2f4f4f; /* deep slate green */
+  --accent: #3b82f6; /* blue accent */
+  --gray-primary: #5a5a5a; /* secondary text gray */
 
   /* Border radius */
   --radius: 0.625rem;
 
   /* Base palette */
-  --background: #F3E4E4;    /* powder pink */
-  --foreground: #2F4F4F;    /* deep slate green text */
+  --background: #f3e4e4; /* powder pink */
+  --foreground: #2f4f4f; /* deep slate green text */
 
   /* Surfaces */
-  --card: #FFFFFF;
-  --card-foreground: #2F4F4F;
+  --card: #ffffff;
+  --card-foreground: #2f4f4f;
 
-  --popover: #FFFFFF;
-  --popover-foreground: #2F4F4F;
+  --popover: #ffffff;
+  --popover-foreground: #2f4f4f;
 
   /* Primary / secondary */
-  --primary: #2F4F4F;
-  --primary-foreground: #FFFFFF;
+  --primary: #2f4f4f;
+  --primary-foreground: #ffffff;
 
-  --secondary: #CABDFF;     /* lavender */
-  --secondary-foreground: #2F4F4F;
+  --secondary: #cabdff; /* lavender */
+  --secondary-foreground: #2f4f4f;
 
   /* Muted / subtle */
-  --muted: #F7EBEB;         /* lighter pink */
-  --muted-foreground: #5A5A5A;
+  --muted: #f7ebeb; /* lighter pink */
+  --muted-foreground: #5a5a5a;
 
   /* Accent */
-  --accent-foreground: #3447AA;
+  --accent-foreground: #3447aa;
 
   /* Destructive */
-  --destructive: #DC2626;
-  --destructive-foreground: #FFFFFF;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
 
   /* Borders / inputs / focus ring */
-  --border: #F0D9D9;
-  --input: #F0D9D9;
-  --ring: #2F4F4F;
+  --border: #f0d9d9;
+  --input: #f0d9d9;
+  --ring: #2f4f4f;
 
   /* Charts*/
-  --chart-1: #3447AA;
-  --chart-2: #CABDFF;
-  --chart-3: #2F4F4F;
-  --chart-4: #FF6F79;
-  --chart-5: #5A5A5A;
+  --chart-1: #3447aa;
+  --chart-2: #cabdff;
+  --chart-3: #2f4f4f;
+  --chart-4: #ff6f79;
+  --chart-5: #5a5a5a;
 
   /* Sidebar*/
-  --sidebar: #FFFFFF;
-  --sidebar-foreground: #2F4F4F;
-  --sidebar-primary: #2F4F4F;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #CABDFF;
-  --sidebar-accent-foreground: #3447AA;
-  --sidebar-border: #F0D9D9;
-  --sidebar-ring: #3447AA;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #2f4f4f;
+  --sidebar-primary: #2f4f4f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #cabdff;
+  --sidebar-accent-foreground: #3447aa;
+  --sidebar-border: #f0d9d9;
+  --sidebar-ring: #3447aa;
+}
+
+html.dark {
+  /* Brand colors */
+  --action: #2f4f4f;
+  --accent: #4f8df7;
+  --gray-primary: #a1a1a1;
+
+  /* Border radius */
+  --radius: 0.625rem;
+
+  /* Base palette */
+  --background: #0a0a0a;
+  --foreground: #f3e4e4;
+
+  /* Surfaces */
+  --card: #141414;
+  --card-foreground: #f3e4e4;
+
+  --popover: #141414;
+  --popover-foreground: #f3e4e4;
+
+  /* Primary */
+  --primary: #3a6b6b;
+  --primary-foreground: #ffffff;
+
+  /* Secondary */
+  --secondary: #4b3fae;
+  --secondary-foreground: #f3e4e4;
+
+  /* Muted */
+  --muted: #1f1f1f;
+  --muted-foreground: #a1a1a1;
+
+  /* Accent */
+  --accent-foreground: #e0e7ff;
+
+  /* Destructive */
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* Borders / inputs */
+  --border: #262626;
+  --input: #262626;
+  --ring: #4f8df7;
+
+  /* Charts */
+  --chart-1: #4f8df7;
+  --chart-2: #7c6cf0;
+  --chart-3: #5fa3a3;
+  --chart-4: #ff7a85;
+  --chart-5: #a1a1a1;
+
+  /* Sidebar */
+  --sidebar: #111111;
+  --sidebar-foreground: #f3e4e4;
+  --sidebar-primary: #4f8df7;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #4b3fae;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #262626;
+  --sidebar-ring: #4f8df7;
 }
 
 /* -------- TAILWIND THEME TOKENS -------- */
@@ -124,25 +186,25 @@
   --radius-xl: calc(var(--radius) + 4px);
   --animate-aurora: aurora 8s ease-in-out infinite alternate;
   @keyframes aurora {
-  0% {
-    background-position: 0% 50%;
-    transform: rotate(-5deg) scale(0.9);
+    0% {
+      background-position: 0% 50%;
+      transform: rotate(-5deg) scale(0.9);
     }
-  25% {
-    background-position: 50% 100%;
-    transform: rotate(5deg) scale(1.1);
+    25% {
+      background-position: 50% 100%;
+      transform: rotate(5deg) scale(1.1);
     }
-  50% {
-    background-position: 100% 50%;
-    transform: rotate(-3deg) scale(0.95);
+    50% {
+      background-position: 100% 50%;
+      transform: rotate(-3deg) scale(0.95);
     }
-  75% {
-    background-position: 50% 0%;
-    transform: rotate(3deg) scale(1.05);
+    75% {
+      background-position: 50% 0%;
+      transform: rotate(3deg) scale(1.05);
     }
-  100% {
-    background-position: 0% 50%;
-    transform: rotate(-5deg) scale(0.9);
+    100% {
+      background-position: 0% 50%;
+      transform: rotate(-5deg) scale(0.9);
     }
   }
 }
@@ -167,7 +229,7 @@ section.bg-primary a[href*="instagram.com/weareskybee"] {
   display: inline-block;
   cursor: pointer;
   font-weight: 700;
-  color: #2F4F4F;
+  color: #2f4f4f;
   position: relative;
   margin: auto;
   padding: 0.6rem 1.2rem;
@@ -185,7 +247,10 @@ section.bg-primary a[href*="instagram.com/weareskybee"]::before {
   border-radius: 9999px;
   transform: scale(0.9);
   background: white;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
   pointer-events: none;
 }
 
@@ -197,8 +262,12 @@ section.bg-primary a[href*="instagram.com/weareskybee"] > span:nth-child(1) {
   background: transparent;
 }
 
-section.bg-primary a[href*="instagram.com/weareskybee"] > span:nth-child(1)::before,
-section.bg-primary a[href*="instagram.com/weareskybee"] > span:nth-child(1)::after {
+section.bg-primary
+  a[href*="instagram.com/weareskybee"]
+  > span:nth-child(1)::before,
+section.bg-primary
+  a[href*="instagram.com/weareskybee"]
+  > span:nth-child(1)::after {
   content: "";
   display: block;
   position: absolute;
@@ -209,8 +278,10 @@ section.bg-primary a[href*="instagram.com/weareskybee"] > span:nth-child(1)::aft
   background-size: contain;
   opacity: var(--icon-opacity, 0);
   transform: scale(var(--icon-scale, 0)) rotate(var(--icon-rotation, 0deg));
-  transition: transform 0.4s cubic-bezier(.02,1.02,.67,1.06), opacity 0.3s ease;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)) saturate(150%);
+  transition:
+    transform 0.4s cubic-bezier(0.02, 1.02, 0.67, 1.06),
+    opacity 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)) saturate(150%);
 }
 
 /* Update the hover state */
@@ -218,12 +289,14 @@ section.bg-primary a[href*="instagram.com/weareskybee"]:hover {
   --icon-scale: 1;
   --icon-rotation: 15deg;
   --icon-opacity: 1;
-  color: #FFFFFF;
+  color: #ffffff;
   transform: translateY(-1px);
 }
 
 /* left-top heart */
-section.bg-primary a[href*="instagram.com/weareskybee"] > span:nth-child(1)::before {
+section.bg-primary
+  a[href*="instagram.com/weareskybee"]
+  > span:nth-child(1)::before {
   top: -0.8em;
   left: -0.4em;
   width: 2.1em;
@@ -233,13 +306,15 @@ section.bg-primary a[href*="instagram.com/weareskybee"] > span:nth-child(1)::bef
 }
 
 /* right-bottom, blurred heart */
-section.bg-primary a[href*="instagram.com/weareskybee"] > span:nth-child(1)::after {
-  top: 1.0em;
+section.bg-primary
+  a[href*="instagram.com/weareskybee"]
+  > span:nth-child(1)::after {
+  top: 1em;
   left: 0.6em;
   width: 1.2em;
   height: 1.2em;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff1744' opacity='0.7'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
-  filter: blur(1px) drop-shadow(0 2px 4px rgba(0,0,0,0.18)) saturate(150%);
+  filter: blur(1px) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18)) saturate(150%);
   z-index: 0;
 }
 
@@ -254,12 +329,20 @@ section.bg-primary a[href*="instagram.com/weareskybee"] > span:nth-child(2) {
 
 section.bg-primary a[href*="instagram.com/weareskybee"]:hover::before {
   transform: scale(1.05);
-  background: linear-gradient(to bottom right, var(--color-dark-purple, #1e0a3a), var(--color-light-purple, #7a4df7));
+  background: linear-gradient(
+    to bottom right,
+    var(--color-dark-purple, #1e0a3a),
+    var(--color-light-purple, #7a4df7)
+  );
   box-shadow: 0 4px 22px -8px rgba(120, 60, 160, 0.5);
 }
 
-section.bg-primary a[href*="instagram.com/weareskybee"]:hover > span:nth-child(1)::before,
-section.bg-primary a[href*="instagram.com/weareskybee"]:hover > span:nth-child(1)::after {
+section.bg-primary
+  a[href*="instagram.com/weareskybee"]:hover
+  > span:nth-child(1)::before,
+section.bg-primary
+  a[href*="instagram.com/weareskybee"]:hover
+  > span:nth-child(1)::after {
   opacity: 1;
   transform: scale(1);
 }

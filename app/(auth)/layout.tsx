@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "Terriva",
@@ -17,9 +17,9 @@ export default function AuthLayout({
       <body
         className={`antialiased`}
       >
-        <SessionProviderWrapper>
+      <Providers attribute="class" defaultTheme="light">
           {children}
-        </SessionProviderWrapper>
+        </Providers>
       </body>
     </html>
   );
