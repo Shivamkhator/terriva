@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Navbar />
-        <ThemeToggle />
+        {/* <ThemeToggle /> */}
         <div className="md:mt-16">
           {children}
         </div>
