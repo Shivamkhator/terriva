@@ -19,14 +19,14 @@ export default function Providers({
 }: ProvidersProps) {
   return (
     <SessionProvider>
-      <ThemeProvider 
+      {/* <ThemeProvider 
         attribute={attribute} 
         enableSystem={enableSystem} 
         defaultTheme={defaultTheme}
         disableTransitionOnChange={false}
-      >
+      > */}
         {children}
-      </ThemeProvider>
+      {/* </ThemeProvider> */}
     </SessionProvider>
   );
 }
