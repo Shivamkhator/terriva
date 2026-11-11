@@ -7,6 +7,7 @@ import { motion, useScroll, useTransform, MotionValue } from "framer-motion"
 import { ArrowDown, Activity, Calendar, Brain, Shield } from "lucide-react"
 import { AuroraText } from "@/components/ui/aurora-text"
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { PreviewCard, PreviewCardPanel, PreviewCardTrigger } from "@/components/animate-ui/components/base/preview-card";
 
 const features = [
@@ -52,6 +53,7 @@ export default function Terriva() {
     })
 
     const { data: session } = useSession();
+    const router = useRouter();
 
     const [insights, setInsights] = React.useState<any | null>(null);
     const [loadingInsights, setLoadingInsights] = React.useState(false);
@@ -73,6 +75,12 @@ export default function Terriva() {
                 if (insRes.ok) {
                     const data = await insRes.json();
                     setInsights(data);
+
+                    // If logged in and insights are available, redirect to insights page
+                    if (data) {
+                        router.replace("/insights");
+                        return;
+                    }
                 }
                 if (perRes.ok) {
                     const data = await perRes.json();
@@ -86,7 +94,7 @@ export default function Terriva() {
         };
 
         loadData();
-    }, [session]);
+    }, [session, router]);
 
     return (
         <div ref={containerRef} className="relative bg-background text-foreground font-sans selection:bg-primary selection:text-white">

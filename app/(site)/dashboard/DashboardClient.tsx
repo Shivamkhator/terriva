@@ -28,6 +28,16 @@ import { type DateRange } from "react-day-picker";
 import { useRouter } from "next/navigation";
 import { Session } from "next-auth";
 import { toast } from "sonner"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type DashboardClientProps = {
     user: Session["user"];
@@ -103,6 +113,10 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
     const [savingFlow, setSavingFlow] = useState(false);
     const [savingPeriod, setSavingPeriod] = useState(false);
+
+    // Confirmation dialog state
+    const [deleteFlowDate, setDeleteFlowDate] = useState<string | null>(null);
+    const [deletePeriodId, setDeletePeriodId] = useState<string | null>(null);
 
     const activePeriod = useMemo(() => {
         return periods.find(p => !p.endDate) ?? null;
@@ -336,13 +350,41 @@ export default function DashboardClient({ user }: DashboardClientProps) {
             if (response.ok) {
                 const newPeriods = periods.filter(p => p.id !== id);
                 setPeriods(newPeriods);
+                toast.success('Period deleted');
             } else {
                 console.error('Failed to delete period');
+                toast.error('Failed to delete period');
             }
         } catch (error) {
             console.error('Error deleting period:', error);
+            toast.error('Something went wrong');
         } finally {
             setSavingPeriod(false);
+            setDeletePeriodId(null);
+        }
+    };
+
+    const deleteFlow = async (dateStr: string) => {
+        try {
+            const response = await fetch('/api/flows', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: dateStr }),
+            });
+
+            if (response.ok) {
+                setDailyFlows(prev => prev.filter(f => f.date !== dateStr));
+                setSelectedDate(null);
+                toast.success('Flow data deleted');
+            } else {
+                console.error('Failed to delete flow');
+                toast.error('Failed to delete flow');
+            }
+        } catch (error) {
+            console.error('Error deleting flow:', error);
+            toast.error('Something went wrong');
+        } finally {
+            setDeleteFlowDate(null);
         }
     };
 
@@ -810,14 +852,42 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                             const hasInfo = flowState || isPeriodDay;
                                             const isSelected = selectedDate === dateStr;
 
+                                            // Double-tap handler for mobile flow deletion
+                                            const tapCountRef = React.useRef(0);
+                                            const tapTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+                                            const handleTap = () => {
+                                                if (!hasInfo) {
+                                                    setSelectedDate(null);
+                                                    return;
+                                                }
+
+                                                tapCountRef.current += 1;
+
+                                                if (tapTimerRef.current) {
+                                                    clearTimeout(tapTimerRef.current);
+                                                }
+
+                                                if (tapCountRef.current >= 2 && flowState) {
+                                                    // Double-tap on flow data → open delete confirmation
+                                                    tapCountRef.current = 0;
+                                                    setDeleteFlowDate(dateStr);
+                                                    return;
+                                                }
+
+                                                tapTimerRef.current = setTimeout(() => {
+                                                    // Single tap → toggle tooltip
+                                                    if (tapCountRef.current === 1) {
+                                                        setSelectedDate(isSelected ? null : dateStr);
+                                                    }
+                                                    tapCountRef.current = 0;
+                                                }, 300);
+                                            };
+
                                             return (
                                                 <div className="relative w-full h-full flex items-center justify-center group">
                                                     <div
-                                                        onClick={() => {
-                                                            if (hasInfo) {
-                                                                setSelectedDate(isSelected ? null : dateStr);
-                                                            }
-                                                        }}
+                                                        onClick={handleTap}
                                                         className={`w-[95%] h-[8vh] flex items-center justify-center text-xs md:text-sm font-medium transition-all hover:scale-105 border border-gray-primary/10 rounded-md ${hasInfo ? 'cursor-pointer' : 'cursor-default'}`}
                                                         style={{
                                                             backgroundColor: flowState ? `${flowState.color}` : undefined,
@@ -830,7 +900,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
                                                     {/* Tooltip - shows on hover OR when clicked */}
                                                     {hasInfo && (
-                                                        <div className={`absolute bottom-full mb-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-1.5 whitespace-nowrap z-10 pointer-events-none transition-opacity ${isSelected ? 'flex opacity-100' : 'hidden group-hover:flex'
+                                                        <div className={`absolute bottom-full mb-2 bg-gray-900 text-white text-xs rounded-lg px-3 py-1.5 whitespace-nowrap z-10 pointer-events-auto transition-opacity items-center gap-2 ${isSelected ? 'flex opacity-100' : 'hidden group-hover:flex'
                                                             }`}>
                                                             {(flowState && isPeriodDay)
                                                                 ? `Day ${periodDayNumber} with ${flowState.label} Flow`
@@ -839,6 +909,20 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                                     : flowState
                                                                         ? `${flowState.label} Flow`
                                                                         : ''}
+
+                                                            {/* Delete button for flow data (desktop hover) */}
+                                                            {flowState && (
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setDeleteFlowDate(dateStr);
+                                                                    }}
+                                                                    className="ml-1 p-0.5 rounded hover:bg-red-500/30 transition-colors"
+                                                                    title="Delete flow data"
+                                                                >
+                                                                    <Trash2 className="h-3 w-3 text-red-400" />
+                                                                </button>
+                                                            )}
 
                                                             {/* Small arrow pointing down */}
                                                             <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
@@ -894,7 +978,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    onClick={() => deletePeriod(period.id)}
+                                                    onClick={() => setDeletePeriodId(period.id)}
                                                     className="transition-colors opacity-100"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
@@ -908,6 +992,51 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                     </Card>
                 )}
             </div>
+
+            {/* Flow Delete Confirmation Dialog */}
+            <AlertDialog open={!!deleteFlowDate} onOpenChange={(open) => { if (!open) setDeleteFlowDate(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Flow Data</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete the flow data for{" "}
+                            <span className="font-semibold">
+                                {deleteFlowDate ? new Date(deleteFlowDate + "T00:00:00").toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : ""}
+                            </span>? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => deleteFlowDate && deleteFlow(deleteFlowDate)}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Period Delete Confirmation Dialog */}
+            <AlertDialog open={!!deletePeriodId} onOpenChange={(open) => { if (!open) setDeletePeriodId(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Period</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete this period record? This action cannot be undone and may affect your cycle insights.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => deletePeriodId && deletePeriod(deletePeriodId)}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
