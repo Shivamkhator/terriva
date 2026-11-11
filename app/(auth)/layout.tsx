@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "Terriva",
@@ -13,14 +12,8 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`antialiased`}
-      >
-      <Providers attribute="class" defaultTheme="light">
-          {children}
-        </Providers>
-      </body>
-    </html>
+    <div className="antialiased">
+      {children}
+    </div>
   );
 }

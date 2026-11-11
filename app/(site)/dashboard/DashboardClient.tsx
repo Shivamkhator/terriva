@@ -470,13 +470,13 @@ export default function DashboardClient({ user }: DashboardClientProps) {
 
 
                 {/* Main Tabs */}
-                <Tabs defaultValue="flow" className="w-full">
+                <Tabs defaultValue="periods" className="w-full">
                     <TabsList className="w-full bg-white/80 backdrop-blur-sm">
-                        <TabsTrigger value="flow" className="text-gray-primary data-[state=active]:text-primary rounded-2xl">
-                            Daily Flow
-                        </TabsTrigger>
                         <TabsTrigger value="periods" className="text-gray-primary data-[state=active]:text-primary rounded-2xl">
                             Track Period
+                        </TabsTrigger>
+                        <TabsTrigger value="flow" className="text-gray-primary data-[state=active]:text-primary rounded-2xl">
+                            Monitor Flow
                         </TabsTrigger>
                     </TabsList>
 
@@ -567,7 +567,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                             <Button
                                                 onClick={handleLogFlow}
                                                 disabled={!flowDate || savingFlow}
-                                                className="w-full h-12 bg-primary text-white "
+                                                className="w-full h-12 bg-primary text-white cursor-pointer disabled:cursor-not-allowed"
                                             >
                                                 {savingFlow ? (
                                                     <span className="flex items-center gap-2">
@@ -710,10 +710,10 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                             )}
 
                                             <Button
-                                                onClick={handleSavePeriod}
-                                                disabled={!dateRange.from || savingPeriod}
-                                                className="w-full h-12 bg-primary text-white mb-4"
-                                            >
+    onClick={handleSavePeriod}
+    disabled={!dateRange.from || savingPeriod}
+    className="w-full h-12 bg-primary text-white mb-4 cursor-pointer disabled:cursor-not-allowed"
+>
                                                 {savingPeriod ? (
                                                     <span className="flex items-center gap-2">
                                                         <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />

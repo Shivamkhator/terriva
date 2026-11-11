@@ -1,7 +1,24 @@
 'use client';
 import AnimatedCircularProgressBar from '@/components/CircularProgressBar';
-import FlowChart from '@/components/FlowChart';
-import LineChart from '@/components/LineChart';
+import dynamic from 'next/dynamic';
+
+const LineChart = dynamic(() => import('@/components/LineChart'), {
+    ssr: false,
+    loading: () => (
+        <div className="flex flex-col items-center justify-center h-48">
+            <video src="/Loader.webm" className="mx-auto w-16 h-16" autoPlay loop muted />
+        </div>
+    ),
+});
+
+const FlowChart = dynamic(() => import('@/components/FlowChart'), {
+    ssr: false,
+    loading: () => (
+        <div className="flex flex-col items-center justify-center h-48">
+            <video src="/Loader.webm" className="mx-auto w-16 h-16" autoPlay loop muted />
+        </div>
+    ),
+});
 import { Session } from "next-auth";
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from "next/navigation";
@@ -215,30 +232,30 @@ export default function InsightsClient({ user }: CycleClientProps) {
     }, [dailyFlows]);
 
     const { currentDay, totalDays } = useMemo(() => {
-  if (!cycleStats.lastPeriod) {
-    return {
-      currentDay: 1,
-      totalDays: cycleStats.avgCycleLength ?? 28,
-    };
-  }
+        if (!cycleStats.lastPeriod) {
+            return {
+                currentDay: 1,
+                totalDays: cycleStats.avgCycleLength ?? 28,
+            };
+        }
 
-  const start = new Date(cycleStats.lastPeriod.startDate);
-  start.setHours(0, 0, 0, 0);
+        const start = new Date(cycleStats.lastPeriod.startDate);
+        start.setHours(0, 0, 0, 0);
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-  const day =
-    Math.floor(
-      (today.getTime() - start.getTime()) /
-      (1000 * 60 * 60 * 24)
-    ) + 1;
+        const day =
+            Math.floor(
+                (today.getTime() - start.getTime()) /
+                (1000 * 60 * 60 * 24)
+            ) + 1;
 
-  return {
-    currentDay: day,
-    totalDays: cycleStats.avgCycleLength ?? 28,
-  };
-}, [cycleStats]);
+        return {
+            currentDay: day,
+            totalDays: cycleStats.avgCycleLength ?? 28,
+        };
+    }, [cycleStats]);
 
     function todayKey() {
         return new Date().toISOString().split("T")[0]; // YYYY-MM-DD

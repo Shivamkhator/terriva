@@ -12,7 +12,6 @@ import { ChevronRightIcon, Brain, RotateCcw, AlertCircle } from "lucide-react"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { Session } from "next-auth"
-import { text } from "stream/consumers";
 
 type ClarityClientProps = {
     user: Session["user"];

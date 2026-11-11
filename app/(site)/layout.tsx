@@ -14,14 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        <Navbar />
-        {/* <ThemeToggle /> */}
-        <div className="md:mt-16">
-          {children}
-        </div>
-      </body>
-    </html>
+    <>
+      <Navbar />
+      {/* <ThemeToggle /> */}
+      <div className="md:mt-16">
+        {children}
+      </div>
+    </>
   );
 }
