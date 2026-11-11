@@ -3,10 +3,14 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { startRegistration, startAuthentication } from "@simplewebauthn/browser"
-import { setLockState } from "@/lib/passkeyLock"
+import { getLockState, setLockState } from "@/lib/passkeyLock"
 import { useRef } from "react"
 
-export function UnlockScreen() {
+interface UnlockScreenProps {
+  onUnlock?: () => void
+}
+
+export function UnlockScreen({ onUnlock }: UnlockScreenProps) {
   const [isVerifying, setIsVerifying] = useState(false)
   const [hasPasskeys, setHasPasskeys] = useState<boolean | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -16,12 +20,16 @@ export function UnlockScreen() {
   
 
   useEffect(() => {
-    const lock = JSON.parse(localStorage.getItem("passkeyLock") || "null")
+    const lock = getLockState()
 
     if (lock?.isUnlocked) {
-      router.replace("/")
+      if (onUnlock) {
+        onUnlock()
+      } else {
+        router.refresh()
+      }
     }
-  }, [router])
+  }, [onUnlock, router])
 
   useEffect(() => {
     checkPasskeys()
@@ -32,7 +40,7 @@ export function UnlockScreen() {
       const res = await fetch("/api/passkey/check")
       const data = await res.json()
       setHasPasskeys(data.hasPasskeys)
-      const lock = JSON.parse(localStorage.getItem("passkeyLock") || "null")
+      const lock = getLockState()
 
       if (data.hasPasskeys && !lock?.isUnlocked && !autoVerifyAttempted.current) {
         autoVerifyAttempted.current = true;
@@ -74,7 +82,11 @@ export function UnlockScreen() {
           unlockedAt: Date.now(),
           userId: session?.user?.id
         })
-        router.replace("/")
+        if (onUnlock) {
+          onUnlock()
+        } else {
+          router.refresh()
+        }
       } else {
         const err = await verifyRes.text()
         setIsVerifying(false)
@@ -113,7 +125,11 @@ export function UnlockScreen() {
           unlockedAt: Date.now(),
           userId: session?.user?.id
         })
-        router.replace("/")
+        if (onUnlock) {
+          onUnlock()
+        } else {
+          router.refresh()
+        }
       } else {
         const err = await verifyRes.text()
         setIsVerifying(false)

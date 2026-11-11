@@ -22,7 +22,7 @@ const FlowChart = dynamic(() => import('@/components/FlowChart'), {
 import { Session } from "next-auth";
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from "next/navigation";
-import { ChevronRightIcon } from "lucide-react"
+import { ChevronRightIcon, Brain } from "lucide-react"
 import { Button } from '@/components/ui/button';
 import {
     getLastPeriod,
@@ -482,8 +482,9 @@ export default function InsightsClient({ user }: CycleClientProps) {
 
                             <div className="text-left md:text-right">
 
-                                <Button onClick={() => router.push("/dashboard")} className="bg-white/20 hover:bg-white/30 text-white font-medium h-10 flex items-center gap-2">
-                                    Dashboard
+                                <Button onClick={() => router.push("/clarity")} className="bg-white/20 hover:bg-white/30 text-white font-medium h-10 flex items-center gap-2">
+                                    <Brain className="h-4 w-4" />
+                                    Clarity
                                     <ChevronRightIcon className="h-4 w-4" />
                                 </Button>
 
@@ -540,8 +541,9 @@ export default function InsightsClient({ user }: CycleClientProps) {
 
                             <div className="text-left md:text-right">
 
-                                <Button onClick={() => router.push("/dashboard")} className="bg-white/20 hover:bg-white/30 text-white font-medium h-10 flex items-center gap-2">
-                                    Dashboard
+                                <Button onClick={() => router.push("/clarity")} className="bg-white/20 hover:bg-white/30 text-white font-medium h-10 flex items-center gap-2">
+                                    <Brain className="h-4 w-4" />
+                                    Clarity
                                     <ChevronRightIcon className="h-4 w-4" />
                                 </Button>
 

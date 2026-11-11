@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from "@/components/ui/slider";
-import { ChevronDown, ChevronRightIcon, Trash2, Save, Calendar as CalendarIcon, TrendingUp, Activity } from "lucide-react";
+import { ChevronDown, ChevronRightIcon, Trash2, Save, Calendar as CalendarIcon, TrendingUp, Activity, ArrowRight } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import {
     Popover,
@@ -968,8 +968,10 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                 className="flex justify-between items-center p-4 bg-linear-to-r from-pink-50 to-purple-50 rounded-xl border-2 border-pink-100 hover:shadow-md transition-all group"
                                             >
                                                 <div>
-                                                    <p className="font-semibold text-sm text-gray-800 flex items-center">
-                                                        {formatDate(period.startDate)} → {period.endDate ? formatDate(period.endDate) : "Ongoing"}
+                                                    <p className="font-semibold text-sm text-gray-800 flex items-center gap-1.5">
+                                                        <span>{formatDate(period.startDate)}</span>
+                                                        <ArrowRight className="h-3.5 w-3.5 text-gray-500 shrink-0 self-center" />
+                                                        <span>{period.endDate ? formatDate(period.endDate) : "Ongoing"}</span>
                                                     </p>
                                                     <p className="text-xs text-gray-600 mt-1">
                                                         Duration: <span className="font-medium text-pink-600">{length} day{length > 1 ? "s" : ""}</span>

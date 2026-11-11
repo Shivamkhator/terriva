@@ -55,7 +55,7 @@ export function PasskeyGuard({ children }: PasskeyGuardProps) {
         )
     }
 
-    if (!unlocked) return <UnlockScreen />
+    if (!unlocked) return <UnlockScreen onUnlock={() => setUnlocked(true)} />
 
     return <>{children}</>
 }

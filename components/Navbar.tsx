@@ -125,7 +125,9 @@ export default function Navbar() {
   ]
   const visibleItems = isLoggedIn ? navItems : guestItems
   const visbleMobileItems: NavItem[] = React.useMemo(() => {
-    const base = visibleItems.map(item => {
+    const base = visibleItems
+      .filter((item) => item.id !== 'clarity')
+      .map(item => {
       if (item.id === 'logout') {
         return {
           ...item,
