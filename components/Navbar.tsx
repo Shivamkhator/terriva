@@ -107,6 +107,9 @@ export default function Navbar() {
     }
 
     clearLockState()
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("terriva_home_redirect_done")
+    }
     signOut()
   }, [logoutArmed])
 
@@ -116,7 +119,19 @@ export default function Navbar() {
     { id: 'dashboard', path: '/dashboard', label: 'Dashboard', icon: icons.dashboard },
     { id: 'insights', path: '/insights', label: 'Insights', icon: <ChartAreaIcon /> },
     { id: 'clarity', path: '/clarity', label: 'Clarity', icon: <Brain /> },
-    { id: 'logout', path: "", label: 'Logout', icon: icons.logoutIcon, onClick: () => { clearLockState(); signOut(); } },
+    {
+      id: 'logout',
+      path: "",
+      label: 'Logout',
+      icon: icons.logoutIcon,
+      onClick: () => {
+        clearLockState();
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("terriva_home_redirect_done");
+        }
+        signOut();
+      }
+    },
   ];
 
   const guestItems: NavItem[] = [
@@ -149,7 +164,15 @@ export default function Navbar() {
         <nav className="h-12 flex items-center mx-8 w-full justify-between">
 
           <div className="flex items-center">
-            <Link href="/" className="mr-8">
+            <Link
+              href="/"
+              className="mr-8"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  sessionStorage.setItem("terriva_home_redirect_done", "true");
+                }
+              }}
+            >
               <Image src="/Terriva.png" alt="Home" width={36} height={36} />
             </Link>
 
@@ -170,6 +193,11 @@ export default function Navbar() {
                       <NavigationMenuLink asChild>
                         <Link
                           href={item.path}
+                          onClick={() => {
+                            if (item.id === "home" && typeof window !== "undefined") {
+                              sessionStorage.setItem("terriva_home_redirect_done", "true");
+                            }
+                          }}
                           className={`flex items-center justify-center gap-2 transition-all hover:text-white ${isActive(item.path)
                             ? "text-white border-b py-1 border-white font-medium"
                             : "text-white/70 border-transparent"
@@ -271,7 +299,16 @@ export default function Navbar() {
                   {content}
                 </button>
               ) : (
-                <Link key={item.id} href={item.path} className={itemClass}>
+                <Link
+                  key={item.id}
+                  href={item.path}
+                  onClick={() => {
+                    if (item.id === "home" && typeof window !== "undefined") {
+                      sessionStorage.setItem("terriva_home_redirect_done", "true");
+                    }
+                  }}
+                  className={itemClass}
+                >
                   {content}
                 </Link>
               )

@@ -52,17 +52,40 @@ export default function Terriva() {
         offset: ["start start", "end end"],
     })
 
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const router = useRouter();
 
     const [insights, setInsights] = React.useState<any | null>(null);
     const [loadingInsights, setLoadingInsights] = React.useState(false);
     const [periods, setPeriods] = React.useState<any[]>([]);
+    const [mounted, setMounted] = React.useState(false);
+    const [isCheckingRedirect, setIsCheckingRedirect] = React.useState(true);
 
     const rotate = useTransform(scrollYProgress, [0, 1], [0, 120])
 
+    React.useEffect(() => {
+        setMounted(true);
+        if (typeof window !== "undefined") {
+            const alreadyRedirected = sessionStorage.getItem("terriva_home_redirect_done") === "true";
+            if (alreadyRedirected) {
+                setIsCheckingRedirect(false);
+            }
+        }
+    }, []);
+
     useEffect(() => {
-        if (!session) return;
+        if (status === "loading") return;
+
+        if (!session) {
+            setIsCheckingRedirect(false);
+            return;
+        }
+
+        const isRedirectDone = typeof window !== "undefined" && sessionStorage.getItem("terriva_home_redirect_done") === "true";
+
+        if (isRedirectDone) {
+            setIsCheckingRedirect(false);
+        }
 
         const loadData = async () => {
             setLoadingInsights(true);
@@ -72,29 +95,47 @@ export default function Terriva() {
                     fetch("/api/insights"),
                     fetch("/api/periods")
                 ]);
-                if (insRes.ok) {
-                    const data = await insRes.json();
-                    setInsights(data);
 
-                    // If logged in and insights are available, redirect to insights page
-                    if (data) {
-                        router.replace("/insights");
-                        return;
-                    }
+                let insightsData = null;
+                if (insRes.ok) {
+                    insightsData = await insRes.json();
+                    setInsights(insightsData);
                 }
                 if (perRes.ok) {
-                    const data = await perRes.json();
-                    setPeriods(data);
+                    const periodsData = await perRes.json();
+                    setPeriods(periodsData);
+                }
+
+                // Initial redirect only when opening website for the first time in this session
+                if (!isRedirectDone) {
+                    sessionStorage.setItem("terriva_home_redirect_done", "true");
+                    if (insightsData) {
+                        router.replace("/insights");
+                    } else {
+                        router.replace("/dashboard");
+                    }
                 }
             } catch (e) {
                 console.error("Insights load failed", e);
+                if (!isRedirectDone) {
+                    sessionStorage.setItem("terriva_home_redirect_done", "true");
+                    router.replace("/dashboard");
+                }
             } finally {
                 setLoadingInsights(false);
             }
         };
 
         loadData();
-    }, [session, router]);
+    }, [session, status, router]);
+
+    if (mounted && isCheckingRedirect && session) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <video src="/Loader.webm" className="mx-auto w-16 h-16" autoPlay loop muted />
+            </div>
+        );
+    }
 
     return (
         <div ref={containerRef} className="relative bg-background text-foreground font-sans selection:bg-primary selection:text-white">
