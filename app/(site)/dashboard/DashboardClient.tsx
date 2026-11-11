@@ -89,10 +89,17 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     const [dailyFlows, setDailyFlows] = React.useState<DailyFlow[]>([]);
     const [historyMonth, setHistoryMonth] = React.useState<Date>(new Date());
 
-    const greeting = useMemo(
-        () => (Math.random() > 0.5 ? "Namaste" : "Konnichiwa"),
-        []
-    );
+    const [greeting, setGreeting] = useState("");
+    useEffect(() => {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 12) {
+            setGreeting("Morning Sunshine");
+        } else if (hour >= 12 && hour < 17) {
+            setGreeting("Afternoon Sunshine");
+        } else {
+            setGreeting("Sweet Dreams, Moonlight");
+        }
+    }, []);
 
     const [savingFlow, setSavingFlow] = useState(false);
     const [savingPeriod, setSavingPeriod] = useState(false);
@@ -383,7 +390,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                             <div>
                                 <div className="mb-2 text-2xl md:text-3xl font-semibold">
                                     <span className="items-center gap-2">
-                                        {greeting}, {user.name?.split(" ")[0] || "User"}!
+                                        {greeting ? `${greeting}!` : "Welcome!"}
                                     </span>
                                 </div>
                                 <p className="opacity-70 text-sm flex items-center gap-1">
@@ -710,10 +717,10 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                             )}
 
                                             <Button
-    onClick={handleSavePeriod}
-    disabled={!dateRange.from || savingPeriod}
-    className="w-full h-12 bg-primary text-white mb-4 cursor-pointer disabled:cursor-not-allowed"
->
+                                                onClick={handleSavePeriod}
+                                                disabled={!dateRange.from || savingPeriod}
+                                                className="w-full h-12 bg-primary text-white mb-4 cursor-pointer disabled:cursor-not-allowed"
+                                            >
                                                 {savingPeriod ? (
                                                     <span className="flex items-center gap-2">
                                                         <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
@@ -811,7 +818,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                                                                 setSelectedDate(isSelected ? null : dateStr);
                                                             }
                                                         }}
-                                                        className={`w-[8vw] h-[8vw] flex items-center justify-center text-xs md:text-sm font-medium transition-all hover:scale-105 border border-gray-primary/10 rounded-md ${hasInfo ? 'cursor-pointer' : 'cursor-default'}`}
+                                                        className={`w-[95%] h-[8vh] flex items-center justify-center text-xs md:text-sm font-medium transition-all hover:scale-105 border border-gray-primary/10 rounded-md ${hasInfo ? 'cursor-pointer' : 'cursor-default'}`}
                                                         style={{
                                                             backgroundColor: flowState ? `${flowState.color}` : undefined,
                                                             color: flowState ? flowState.textColor : undefined,

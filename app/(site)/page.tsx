@@ -371,7 +371,7 @@ function FooterSection() {
             <PreviewCard>
                 <PreviewCardTrigger
                     render={
-                        <Link className="text-white leading-none uppercase mb-8 text-[8vw] font-bold text-shadow-lg" href="https://shivamkhator.framer.website">Terriva
+                        <Link className="text-white leading-none uppercase mb-8 text-[8vw] font-bold text-shadow-lg" href="https://terriva.vercel.app">Terriva
                         </Link>
                     }
                 />

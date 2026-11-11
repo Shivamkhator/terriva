@@ -53,13 +53,13 @@ export default function SignInPage() {
   ];
 
   const arr = [
-    "https://images.pexels.com/photos/285889/pexels-photo-285889.jpeg",
-    "https://images.pexels.com/photos/733856/pexels-photo-733856.jpeg",
-    "https://images.pexels.com/photos/7615876/pexels-photo-7615876.jpeg",
-    "https://images.pexels.com/photos/12714815/pexels-photo-12714815.jpeg",
-    "https://images.pexels.com/photos/289586/pexels-photo-289586.jpeg",
-    "https://images.pexels.com/photos/27178124/pexels-photo-27178124.jpeg",
-    "https://images.pexels.com/photos/710743/pexels-photo-710743.jpeg"
+    "https://images.pexels.com/photos/285889/pexels-photo-285889.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "https://images.pexels.com/photos/733856/pexels-photo-733856.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "https://images.pexels.com/photos/7615876/pexels-photo-7615876.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "https://images.pexels.com/photos/12714815/pexels-photo-12714815.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "https://images.pexels.com/photos/289586/pexels-photo-289586.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "https://images.pexels.com/photos/27178124/pexels-photo-27178124.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    "https://images.pexels.com/photos/710743/pexels-photo-710743.jpeg?auto=compress&cs=tinysrgb&w=1200"
   ];
 
   const rand = new Date().getDay();
@@ -72,8 +72,10 @@ export default function SignInPage() {
           <Image
             src={arr[rand]}
             alt="Decorative sign-in image"
-            width={1920}
+            width={1200}
             height={1080}
+            priority
+            sizes="(max-width: 768px) 0vw, (max-width: 1024px) 40vw, 60vw"
             className="h-full w-full object-cover"
           />
         </div>

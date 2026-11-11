@@ -83,10 +83,17 @@ export default function Navbar() {
     )
   };
 
-  const greeting = useMemo(
-          () => (Math.random() > 0.5 ? "Namaste" : "Konnichiwa"),
-          []
-      );
+  const [greeting, setGreeting] = React.useState("");
+  React.useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      setGreeting("Morning Sunshine");
+    } else if (hour >= 12 && hour < 17) {
+      setGreeting("Afternoon Sunshine");
+    } else {
+      setGreeting("Sweet Dreams, Starlight");
+    }
+  }, []);
 
   const handleMobileLogout = React.useCallback(() => {
     if (!logoutArmed) {
@@ -201,7 +208,9 @@ export default function Navbar() {
               </button>
             ) : (
               <div className="relative inline-flex items-center gap-2 rounded-md py-1 text-sm font-medium">
-                <span className="hidden lg:inline-block text-white font-semibold">{greeting}, {session.user?.name || session.user?.email || "User"}</span>
+                <span className="hidden lg:inline-block text-white font-semibold">
+                  {greeting ? `${greeting}!` : ""}
+                </span>
               </div>
             )}
           </div>
